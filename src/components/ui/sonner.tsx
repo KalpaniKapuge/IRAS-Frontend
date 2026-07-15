@@ -1,0 +1,35 @@
+import { Toaster as Sonner } from "sonner";
+import { useThemeStore } from "@/stores/theme-store";
+
+type ToasterProps = React.ComponentProps<typeof Sonner>;
+
+function useResolvedTheme(): "light" | "dark" {
+  const theme = useThemeStore((s) => s.theme);
+  if (theme === "system") {
+    return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+  return theme;
+}
+
+export function Toaster({ ...props }: ToasterProps) {
+  const theme = useResolvedTheme();
+
+  return (
+    <Sonner
+      theme={theme}
+      className="toaster group"
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-card group-[.toaster]:text-card-foreground group-[.toaster]:border-border group-[.toaster]:shadow-elevated group-[.toaster]:rounded-xl",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+        },
+      }}
+      {...props}
+    />
+  );
+}
