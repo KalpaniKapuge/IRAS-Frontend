@@ -14,8 +14,7 @@ interface AuthLayoutProps {
   title: string;
   description: string;
   children: React.ReactNode;
-  /** Optional photo for the side panel (e.g. `/auth/hero.jpg` in `public/`). Falls back
-   *  to a pure CSS gradient/mesh design when omitted. */
+  
   imageSrc?: string;
 }
 

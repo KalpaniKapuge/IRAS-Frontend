@@ -42,8 +42,7 @@ export function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // guard against double-submit
-
+    if (isLoading) return; 
     setFormError(null);
     setFieldErrors({});
 
@@ -85,9 +84,7 @@ export function RegisterPage() {
         return;
       }
 
-      // The backend's "email already exists" conflict isn't a ValidationProblemDetails
-      // field error (it's a plain 400 { message }) — pin it to the email field instead
-      // of a generic banner, since that's the one thing the user needs to change.
+     
       if (/email/i.test(err.message)) {
         setFieldErrors({ email: err.message });
         return;

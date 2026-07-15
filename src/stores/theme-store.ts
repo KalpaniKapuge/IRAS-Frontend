@@ -1,23 +1,25 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type ThemePreference = "light" | "dark" | "system";
+export type ThemePreference = "light" | "dark";
 
 interface ThemeState {
   theme: ThemePreference;
   setTheme: (theme: ThemePreference) => void;
 }
 
+function normalizeTheme(theme: unknown): ThemePreference {
+  return theme === "dark" ? "dark" : "light";
+}
+
 function applyThemeClass(theme: ThemePreference) {
-  const isDark =
-    theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: "system",
+      theme: "light",
       setTheme: (theme) => {
         applyThemeClass(theme);
         set({ theme });
@@ -26,17 +28,14 @@ export const useThemeStore = create<ThemeState>()(
     {
       name: "iras-theme",
       onRehydrateStorage: () => (state) => {
-        if (state) applyThemeClass(state.theme);
+        if (!state) return;
+
+        const theme = normalizeTheme(state.theme);
+        applyThemeClass(theme);
+        if (state.theme !== theme) {
+          state.setTheme(theme);
+        }
       },
     },
   ),
 );
-
-// Keep the DOM in sync when the OS-level preference changes while "system" is selected.
-if (typeof window !== "undefined") {
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (useThemeStore.getState().theme === "system") {
-      applyThemeClass("system");
-    }
-  });
-}

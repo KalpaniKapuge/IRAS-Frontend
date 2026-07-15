@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-// Mirrors the backend's actual password rule (RegisterRequest: [MinLength(8)]) plus a
-// couple of client-side-only strength requirements surfaced via PASSWORD_RULES below —
-// the backend is still the source of truth and is re-validated on submit regardless.
+
 const passwordSchema = z
   .string()
   .min(1, "Password is required.")
@@ -62,8 +60,7 @@ export const PASSWORD_RULES: { label: string; test: (value: string) => boolean }
   { label: "At least one number", test: (v) => /[0-9]/.test(v) },
 ];
 
-/** Flattens a Zod safeParse failure into the same `{ field: message }` shape the
- *  backend's mapped field errors use, so both sources render through one code path. */
+
 export function flattenZodErrors(error: z.ZodError): Record<string, string> {
   const result: Record<string, string> = {};
   for (const issue of error.issues) {

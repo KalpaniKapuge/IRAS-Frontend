@@ -26,7 +26,7 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // guard against double-submit (e.g. double Enter keypress)
+    if (isLoading) return; 
 
     setFormError(null);
     setFieldErrors({});
@@ -44,9 +44,7 @@ export function LoginPage() {
       navigate(redirectTo || (user ? ROLE_HOME[user.role] : "/"), { replace: true });
       toast.success("Welcome back!");
     } catch (err) {
-      // Login failures (bad credentials, deactivated account, network/server errors) are
-      // never field-specific — surfacing "which field is wrong" would help an attacker
-      // enumerate valid emails, so this always renders as a single top-level banner.
+      
       setFormError(err instanceof ApiError ? err.message : "Login failed. Please try again.");
     }
   };

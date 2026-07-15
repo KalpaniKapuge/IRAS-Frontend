@@ -4,13 +4,7 @@ import { useThemeStore } from "@/stores/theme-store";
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 function useResolvedTheme(): "light" | "dark" {
-  const theme = useThemeStore((s) => s.theme);
-  if (theme === "system") {
-    return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  }
-  return theme;
+  return useThemeStore((s) => s.theme);
 }
 
 export function Toaster({ ...props }: ToasterProps) {
