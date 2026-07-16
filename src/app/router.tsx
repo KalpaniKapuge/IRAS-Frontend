@@ -4,6 +4,7 @@ import { PageSpinner } from "@/components/shared/loading-state";
 import { AppShell } from "@/components/layout/app-shell";
 import { ProtectedRoute, GuestRoute } from "@/app/protected-route";
 import { NotFoundPage } from "@/pages/not-found-page";
+import { RouteErrorPage } from "@/pages/route-error-page";
 import { RootRedirect } from "@/pages/root-redirect";
 import { LoginPage } from "@/features/auth/pages/login-page";
 import { RegisterPage } from "@/features/auth/pages/register-page";
@@ -69,9 +70,11 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <RootRedirect />,
+    errorElement: <RouteErrorPage />,
   },
   {
     element: <GuestRoute />,
+    errorElement: <RouteErrorPage />,
     children: [
       { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <RegisterPage /> },
@@ -79,10 +82,12 @@ const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute allow={["Candidate"]} />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: "/candidate",
         element: <AppShell />,
+        errorElement: <RouteErrorPage />,
         children: [
           { index: true, element: <CandidateDashboardPage /> },
           { path: "jobs", element: <JobsBrowsePage /> },
@@ -98,10 +103,12 @@ const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute allow={["Employer"]} />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: "/employer",
         element: <AppShell />,
+        errorElement: <RouteErrorPage />,
         children: [
           { index: true, element: <EmployerDashboardPage /> },
           { path: "jobs", element: <EmployerJobsPage /> },
@@ -115,10 +122,12 @@ const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute allow={["Admin"]} />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: "/admin",
         element: <AppShell />,
+        errorElement: <RouteErrorPage />,
         children: [
           { index: true, element: <AdminDashboardPage /> },
           { path: "users", element: <UsersAdminPage /> },
@@ -131,7 +140,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "*", element: <NotFoundPage /> },
+  { path: "*", element: <NotFoundPage />, errorElement: <RouteErrorPage /> },
 ]);
 
 export function AppRouter() {
