@@ -41,7 +41,18 @@ export const useApplicationsStore = create<ApplicationsState>()((set, get) => ({
   apply: async (payload) => {
     set({ isApplying: true });
     try {
-      await applicationsApi.apply(payload);
+      const existingApplications =
+        get().myApplications.length > 0 ? get().myApplications : await applicationsApi.getMine();
+      const existing = existingApplications.find((application) => application.jobId === payload.jobId);
+
+      if (existing) {
+        set({ myApplications: existingApplications });
+        toast.info("You have already applied to this job.");
+        return false;
+      }
+
+      const saved = await applicationsApi.apply(payload);
+      set({ myApplications: [saved, ...existingApplications] });
       toast.success("Application submitted!");
       return true;
     } catch (err) {

@@ -20,7 +20,7 @@ export function ResumesPage() {
         title="Resumes"
         description="Upload up to 5 resumes. We'll parse them with AI to extract skills, contact details, and experience."
       />
-      <ResumeUploadDropzone />
+      <ResumeUploadDropzone existingCount={resumes.length} />
       {isLoading && resumes.length === 0 ? <RowSkeletonList count={3} /> : <ResumeList resumes={resumes} />}
       <SkillConfirmationDialog />
     </div>

@@ -10,7 +10,7 @@ interface ResumeState {
   isUploading: boolean;
   pendingParseResult: ParseResultDto | null;
   load: () => Promise<void>;
-  upload: (file: File) => Promise<void>;
+  upload: (file: File) => Promise<ParseResultDto | null>;
   retryParse: (resumeId: number) => Promise<void>;
   confirmSkills: (resumeId: number, skillIds: number[]) => Promise<void>;
   setPrimary: (resumeId: number) => Promise<void>;
@@ -47,8 +47,10 @@ export const useResumeStore = create<ResumeState>()((set, get) => ({
       } else {
         toast.success("Resume uploaded.");
       }
+      return result;
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Upload failed.");
+      return null;
     } finally {
       set({ isUploading: false });
     }
