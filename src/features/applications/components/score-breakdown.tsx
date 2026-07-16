@@ -21,23 +21,34 @@ export function ScoreBreakdown({
   skillGaps,
 }: ScoreBreakdownProps) {
   return (
-    <div className="space-y-4">
-      <ScoreBar value={totalScore} label="Overall match score" />
-      <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-        <ScoreBar value={skillMatch} label="Skill match" />
-        <ScoreBar value={experienceMatch} label="Experience" />
-        <ScoreBar value={educationMatch} label="Education" />
-        <ScoreBar value={semanticSimilarity} label="Resume relevance" />
+    <div className="space-y-5">
+      <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+        <ScoreBar value={totalScore} label="Overall match score" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+          <ScoreBar value={skillMatch} label="Skill match" />
+        </div>
+        <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+          <ScoreBar value={experienceMatch} label="Experience" />
+        </div>
+        <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+          <ScoreBar value={educationMatch} label="Education" />
+        </div>
+        <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+          <ScoreBar value={semanticSimilarity} label="Resume relevance" />
+        </div>
       </div>
 
       {skillGaps.length > 0 && (
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Skill gaps</p>
+        <div className="rounded-lg border border-warning/20 bg-warning/10 p-4">
+          <p className="mb-3 text-xs font-semibold uppercase text-muted-foreground">Skill gaps to improve</p>
           <div className="flex flex-wrap gap-2">
             {skillGaps.map((gap) => (
               <Badge key={gap.skillId} variant={gap.importance === "MustHave" ? "destructive" : "muted"}>
                 {gap.skillName}
-                <span className="opacity-70">· {titleCase(gap.importance)}</span>
+                <span className="opacity-70">- {titleCase(gap.importance)}</span>
               </Badge>
             ))}
           </div>
