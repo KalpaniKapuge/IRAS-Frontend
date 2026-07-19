@@ -1,20 +1,28 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { Camera } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EDUCATION_LEVELS } from "@/types/enums";
 import { getInitials, titleCase } from "@/lib/utils";
 import { useCandidateProfileStore } from "../store";
 import type { CandidateProfileDto } from "../types";
 
+const PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const PROFILE_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+
 export function ProfileHeaderCard({ profile, candidateId }: { profile: CandidateProfileDto; candidateId: number }) {
   const updateProfile = useCandidateProfileStore((s) => s.updateProfile);
+  const uploadProfilePicture = useCandidateProfileStore((s) => s.uploadProfilePicture);
   const isSaving = useCandidateProfileStore((s) => s.isSaving);
+  const isUploadingProfilePicture = useCandidateProfileStore((s) => s.isUploadingProfilePicture);
   const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [firstName, setFirstName] = useState(profile.firstName);
   const [lastName, setLastName] = useState(profile.lastName);
@@ -47,13 +55,55 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
     setEditing(false);
   };
 
+  const handleProfilePictureChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!PROFILE_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Upload a JPG, PNG, or WebP profile picture.");
+      return;
+    }
+
+    if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+      toast.error("Profile picture must be 2 MB or smaller.");
+      return;
+    }
+
+    await uploadProfilePicture(candidateId, file).catch(() => undefined);
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
         <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16 text-lg">
-            <AvatarFallback>{getInitials(profile.firstName, profile.lastName)}</AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-16 w-16 text-lg">
+              {profile.profilePictureUrl && (
+                <AvatarImage src={profile.profilePictureUrl} alt={`${profile.firstName} ${profile.lastName}`} />
+              )}
+              <AvatarFallback>{getInitials(profile.firstName, profile.lastName)}</AvatarFallback>
+            </Avatar>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={PROFILE_IMAGE_TYPES.join(",")}
+              className="hidden"
+              onChange={handleProfilePictureChange}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              loading={isUploadingProfilePicture}
+              disabled={isUploadingProfilePicture}
+              className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full border border-background shadow-soft"
+              aria-label="Upload profile picture"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {!isUploadingProfilePicture && <Camera className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
           <div>
             <CardTitle className="text-xl">
               {profile.firstName} {profile.lastName}

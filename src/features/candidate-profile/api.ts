@@ -19,6 +19,16 @@ export const candidateProfileApi = {
   updateProfile: (candidateId: number, payload: UpdateCandidateProfileRequest) =>
     http.put(base(candidateId), payload).then((r) => r.data),
 
+  uploadProfilePicture: (candidateId: number, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return http
+      .post(`${base(candidateId)}/profile-picture`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
+
   addEducation: (candidateId: number, payload: EducationFormValues) =>
     http.post<EducationDto>(`${base(candidateId)}/education`, payload).then((r) => r.data),
 
@@ -37,8 +47,35 @@ export const candidateProfileApi = {
   deleteExperience: (candidateId: number, experienceId: number) =>
     http.delete(`${base(candidateId)}/experience/${experienceId}`).then((r) => r.data),
 
-  addCertification: (candidateId: number, payload: CertificationFormValues) =>
-    http.post<CertificationDto>(`${base(candidateId)}/certifications`, payload).then((r) => r.data),
+  addCertification: (candidateId: number, payload: CertificationFormValues) => {
+    if (!payload.certificateFile) {
+      const { certificateFile: _certificateFile, ...jsonPayload } = payload;
+      return http.post<CertificationDto>(`${base(candidateId)}/certifications`, jsonPayload).then((r) => r.data);
+    }
+
+    const form = new FormData();
+    form.append("name", payload.name);
+    if (payload.issuingOrg) form.append("issuingOrg", payload.issuingOrg);
+    if (payload.issueDate) form.append("issueDate", payload.issueDate);
+    if (payload.expiryDate) form.append("expiryDate", payload.expiryDate);
+    form.append("file", payload.certificateFile);
+
+    return http
+      .post<CertificationDto>(`${base(candidateId)}/certifications`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
+
+  uploadCertificationFile: (candidateId: number, certificationId: number, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return http
+      .post<CertificationDto>(`${base(candidateId)}/certifications/${certificationId}/file`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
 
   deleteCertification: (candidateId: number, certificationId: number) =>
     http.delete(`${base(candidateId)}/certifications/${certificationId}`).then((r) => r.data),

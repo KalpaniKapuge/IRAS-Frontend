@@ -26,6 +26,8 @@ export interface CertificationDto {
   issuingOrg: string | null;
   issueDate: string | null;
   expiryDate: string | null;
+  certificateUrl?: string | null;
+  certificateFileName?: string | null;
 }
 
 export interface CandidateSkillDto {
@@ -44,6 +46,7 @@ export interface CandidateProfileDto {
   citizenship: string | null;
   phone: string | null;
   headline: string | null;
+  profilePictureUrl?: string | null;
   totalExpYears: number;
   educationLevel: EducationLevel;
   optInMatching: boolean;
@@ -65,7 +68,13 @@ export interface UpdateCandidateProfileRequest {
 
 export type EducationFormValues = Omit<EducationDto, "educationId"> & { educationId?: number };
 export type WorkExperienceFormValues = Omit<WorkExperienceDto, "experienceId"> & { experienceId?: number };
-export type CertificationFormValues = Omit<CertificationDto, "certificationId"> & { certificationId?: number };
+export type CertificationFormValues = Omit<
+  CertificationDto,
+  "certificationId" | "certificateUrl" | "certificateFileName"
+> & {
+  certificationId?: number;
+  certificateFile?: File | null;
+};
 
 export interface UpsertCandidateSkillRequest {
   skillId: number;

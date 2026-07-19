@@ -15,8 +15,10 @@ interface CandidateProfileState {
   profile: CandidateProfileDto | null;
   isLoading: boolean;
   isSaving: boolean;
+  isUploadingProfilePicture: boolean;
   load: (candidateId: number) => Promise<void>;
   updateProfile: (candidateId: number, payload: UpdateCandidateProfileRequest) => Promise<void>;
+  uploadProfilePicture: (candidateId: number, file: File) => Promise<void>;
   addEducation: (candidateId: number, payload: EducationFormValues) => Promise<void>;
   updateEducation: (candidateId: number, educationId: number, payload: EducationFormValues) => Promise<void>;
   deleteEducation: (candidateId: number, educationId: number) => Promise<void>;
@@ -24,6 +26,7 @@ interface CandidateProfileState {
   updateExperience: (candidateId: number, experienceId: number, payload: WorkExperienceFormValues) => Promise<void>;
   deleteExperience: (candidateId: number, experienceId: number) => Promise<void>;
   addCertification: (candidateId: number, payload: CertificationFormValues) => Promise<void>;
+  uploadCertificationFile: (candidateId: number, certificationId: number, file: File) => Promise<void>;
   deleteCertification: (candidateId: number, certificationId: number) => Promise<void>;
   upsertSkill: (candidateId: number, payload: UpsertCandidateSkillRequest) => Promise<void>;
   removeSkill: (candidateId: number, skillId: number) => Promise<void>;
@@ -33,10 +36,20 @@ function handle(err: unknown, fallback: string) {
   toast.error(err instanceof ApiError ? err.message : fallback);
 }
 
+function handleUpload(err: unknown, fallback: string) {
+  if (err instanceof ApiError && err.status === 404) {
+    toast.error("Upload endpoint is not available on the backend yet.");
+    return;
+  }
+
+  handle(err, fallback);
+}
+
 export const useCandidateProfileStore = create<CandidateProfileState>()((set, get) => ({
   profile: null,
   isLoading: false,
   isSaving: false,
+  isUploadingProfilePicture: false,
 
   load: async (candidateId) => {
     set({ isLoading: true });
@@ -60,6 +73,19 @@ export const useCandidateProfileStore = create<CandidateProfileState>()((set, ge
       throw err;
     } finally {
       set({ isSaving: false });
+    }
+  },
+
+  uploadProfilePicture: async (candidateId, file) => {
+    set({ isUploadingProfilePicture: true });
+    try {
+      await candidateProfileApi.uploadProfilePicture(candidateId, file);
+      await get().load(candidateId);
+      toast.success("Profile picture uploaded.");
+    } catch (err) {
+      handleUpload(err, "Failed to upload profile picture.");
+    } finally {
+      set({ isUploadingProfilePicture: false });
     }
   },
 
@@ -131,8 +157,22 @@ export const useCandidateProfileStore = create<CandidateProfileState>()((set, ge
       await get().load(candidateId);
       toast.success("Certification added.");
     } catch (err) {
-      handle(err, "Failed to add certification.");
+      if (payload.certificateFile) {
+        handleUpload(err, "Failed to add certification with certificate file.");
+      } else {
+        handle(err, "Failed to add certification.");
+      }
       throw err;
+    }
+  },
+
+  uploadCertificationFile: async (candidateId, certificationId, file) => {
+    try {
+      await candidateProfileApi.uploadCertificationFile(candidateId, certificationId, file);
+      await get().load(candidateId);
+      toast.success("Certificate uploaded.");
+    } catch (err) {
+      handleUpload(err, "Failed to upload certificate.");
     }
   },
 
