@@ -59,6 +59,7 @@ export function SystemStatusPage() {
           <CardContent className="space-y-4">
             <ScoreBar value={settings.skillMatchWeight} label="Skill match weight" />
             <ScoreBar value={settings.semanticSimilarityWeight} label="Semantic similarity weight" />
+            <ScoreBar value={settings.mlFitScoreWeight} label="ML fit-classifier weight" />
             <ScoreBar value={settings.autoMatchThreshold} label="Auto-match notification threshold" />
           </CardContent>
         </Card>

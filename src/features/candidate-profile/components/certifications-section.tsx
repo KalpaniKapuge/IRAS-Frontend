@@ -194,9 +194,9 @@ export function CertificationsSection({
                       {cert.expiryDate ? ` - ${formatDate(cert.expiryDate, "MMM yyyy")}` : ""}
                     </p>
                   )}
-                  {cert.certificateUrl ? (
+                  {cert.certificateFileUrl ? (
                     <a
-                      href={cert.certificateUrl}
+                      href={cert.certificateFileUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="mt-2 inline-flex max-w-full items-center gap-1 text-xs font-medium text-primary hover:underline"
@@ -223,7 +223,7 @@ export function CertificationsSection({
                     size="icon"
                     className="h-8 w-8"
                     loading={uploadingId === cert.certificationId}
-                    aria-label={cert.certificateUrl ? "Replace certificate file" : "Upload certificate file"}
+                    aria-label={cert.certificateFileUrl ? "Replace certificate file" : "Upload certificate file"}
                     onClick={() => existingFileInputRefs.current[cert.certificationId]?.click()}
                   >
                     {uploadingId !== cert.certificationId && <FileUp className="h-3.5 w-3.5" />}

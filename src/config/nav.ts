@@ -3,6 +3,7 @@ import {
   Bot,
   Briefcase,
   Building2,
+  CalendarClock,
   FileStack,
   FileText,
   Gauge,
@@ -42,6 +43,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
         { label: "My Applications", to: "/candidate/applications", icon: ListChecks },
         { label: "Job Matches", to: "/candidate/matches", icon: Radar },
         { label: "Skill Gaps", to: "/candidate/skill-gaps", icon: Target },
+        { label: "Interviews", to: "/candidate/interviews", icon: CalendarClock },
       ],
     },
     {
@@ -49,6 +51,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
       items: [
         { label: "My Profile", to: "/candidate/profile", icon: Users },
         { label: "Resumes", to: "/candidate/resumes", icon: FileText },
+        { label: "My CVs", to: "/candidate/cvs", icon: FileStack },
       ],
     },
   ],
@@ -58,7 +61,10 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
     },
     {
       title: "Hiring",
-      items: [{ label: "Job Postings", to: "/employer/jobs", icon: Briefcase }],
+      items: [
+        { label: "Job Postings", to: "/employer/jobs", icon: Briefcase },
+        { label: "Interviews", to: "/employer/interviews", icon: CalendarClock },
+      ],
     },
     {
       title: "Company",

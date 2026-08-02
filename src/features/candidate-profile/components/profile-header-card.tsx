@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Github, Linkedin } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
   const [headline, setHeadline] = useState(profile.headline ?? "");
   const [citizenship, setCitizenship] = useState(profile.citizenship ?? "");
   const [phone, setPhone] = useState(profile.phone ?? "");
+  const [githubUrl, setGithubUrl] = useState(profile.githubUrl ?? "");
+  const [linkedInUrl, setLinkedInUrl] = useState(profile.linkedInUrl ?? "");
   const [educationLevel, setEducationLevel] = useState(profile.educationLevel);
   const [optInMatching, setOptInMatching] = useState(profile.optInMatching);
 
@@ -38,6 +40,8 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
     setHeadline(profile.headline ?? "");
     setCitizenship(profile.citizenship ?? "");
     setPhone(profile.phone ?? "");
+    setGithubUrl(profile.githubUrl ?? "");
+    setLinkedInUrl(profile.linkedInUrl ?? "");
     setEducationLevel(profile.educationLevel);
     setOptInMatching(profile.optInMatching);
   }, [profile]);
@@ -49,6 +53,8 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
       headline: headline || undefined,
       citizenship: citizenship || undefined,
       phone: phone || undefined,
+      githubUrl: githubUrl || undefined,
+      linkedInUrl: linkedInUrl || undefined,
       educationLevel,
       optInMatching,
     });
@@ -109,6 +115,32 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
               {profile.firstName} {profile.lastName}
             </CardTitle>
             <CardDescription>{profile.headline || "Add a headline to stand out to employers"}</CardDescription>
+            {(profile.githubUrl || profile.linkedInUrl) && (
+              <div className="mt-2 flex items-center gap-3">
+                {profile.githubUrl && (
+                  <a
+                    href={profile.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="View GitHub profile"
+                    className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Github className="h-3.5 w-3.5" /> GitHub
+                  </a>
+                )}
+                {profile.linkedInUrl && (
+                  <a
+                    href={profile.linkedInUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="View LinkedIn profile"
+                    className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <Button variant={editing ? "outline" : "secondary"} size="sm" onClick={() => setEditing((v) => !v)}>
@@ -182,6 +214,24 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Github className="h-3.5 w-3.5" /> GitHub profile URL</Label>
+                <Input
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  placeholder="https://github.com/yourusername"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Linkedin className="h-3.5 w-3.5" /> LinkedIn profile URL</Label>
+                <Input
+                  value={linkedInUrl}
+                  onChange={(e) => setLinkedInUrl(e.target.value)}
+                  placeholder="https://linkedin.com/in/yourusername"
+                />
               </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">

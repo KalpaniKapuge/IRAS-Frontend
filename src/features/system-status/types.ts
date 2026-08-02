@@ -9,6 +9,7 @@ export interface AiModelStatusDto {
 export interface SystemSettingsDto {
   skillMatchWeight: number;
   semanticSimilarityWeight: number;
+  mlFitScoreWeight: number;
   autoMatchThreshold: number;
   aiServiceBaseUrl: string;
   aiServiceTimeoutSeconds: number;

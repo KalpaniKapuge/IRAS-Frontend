@@ -35,6 +35,12 @@ const CandidateProfilePage = () =>
   lazyPage(() => import("@/features/candidate-profile/pages/candidate-profile-page").then((m) => ({ default: m.CandidateProfilePage })));
 const ResumesPage = () =>
   lazyPage(() => import("@/features/resumes/pages/resumes-page").then((m) => ({ default: m.ResumesPage })));
+const CvListPage = () =>
+  lazyPage(() => import("@/features/cv/pages/cv-list-page").then((m) => ({ default: m.CvListPage })));
+const CvEditorPage = () =>
+  lazyPage(() => import("@/features/cv/pages/cv-editor-page").then((m) => ({ default: m.CvEditorPage })));
+const CandidateInterviewsPage = () =>
+  lazyPage(() => import("@/features/interviews/pages/candidate-interviews-page").then((m) => ({ default: m.CandidateInterviewsPage })));
 
 // Employer
 const EmployerDashboardPage = () =>
@@ -49,6 +55,8 @@ const JobApplicantsPage = () =>
   lazyPage(() => import("@/features/applications/pages/employer/job-applicants-page").then((m) => ({ default: m.JobApplicantsPage })));
 const EmployerProfilePage = () =>
   lazyPage(() => import("@/features/employer-profile/pages/employer-profile-page").then((m) => ({ default: m.EmployerProfilePage })));
+const EmployerInterviewsPage = () =>
+  lazyPage(() => import("@/features/interviews/pages/employer-interviews-page").then((m) => ({ default: m.EmployerInterviewsPage })));
 
 // Admin
 const AdminDashboardPage = () =>
@@ -97,6 +105,9 @@ const router = createBrowserRouter([
           { path: "skill-gaps", element: <SkillGapsPage /> },
           { path: "profile", element: <CandidateProfilePage /> },
           { path: "resumes", element: <ResumesPage /> },
+          { path: "cvs", element: <CvListPage /> },
+          { path: "cvs/:cvId", element: <CvEditorPage /> },
+          { path: "interviews", element: <CandidateInterviewsPage /> },
         ],
       },
     ],
@@ -116,6 +127,7 @@ const router = createBrowserRouter([
           { path: "jobs/:jobId", element: <JobEditPage /> },
           { path: "jobs/:jobId/applicants", element: <JobApplicantsPage /> },
           { path: "profile", element: <EmployerProfilePage /> },
+          { path: "interviews", element: <EmployerInterviewsPage /> },
         ],
       },
     ],

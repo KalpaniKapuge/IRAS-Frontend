@@ -88,6 +88,12 @@ export type KnowledgeCategory = (typeof KNOWLEDGE_CATEGORIES)[number];
 export const ALIAS_SOURCES = ["AdminAdded", "ResumeParsed"] as const;
 export type AliasSource = (typeof ALIAS_SOURCES)[number];
 
+export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
+export type InterviewMode = (typeof INTERVIEW_MODES)[number];
+
+export const INTERVIEW_STATUSES = ["Scheduled", "Completed", "NoShow", "Cancelled"] as const;
+export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
+
 // ---- Display metadata: label + badge tone per enum value ----
 
 export type BadgeTone = "default" | "primary" | "success" | "warning" | "destructive" | "info" | "muted";
@@ -134,6 +140,13 @@ const importanceTone: Record<ImportanceLevel, BadgeTone> = {
   NiceToHave: "muted",
 };
 
+const interviewStatusTone: Record<InterviewStatus, BadgeTone> = {
+  Scheduled: "info",
+  Completed: "success",
+  NoShow: "warning",
+  Cancelled: "muted",
+};
+
 export const ENUM_TONE_MAPS = {
   ApplicationStatus: applicationStatusTone,
   JobStatus: jobStatusTone,
@@ -141,4 +154,5 @@ export const ENUM_TONE_MAPS = {
   ApprovalStatus: approvalStatusTone,
   DeliveryStatus: deliveryStatusTone,
   ImportanceLevel: importanceTone,
+  InterviewStatus: interviewStatusTone,
 } as const;
