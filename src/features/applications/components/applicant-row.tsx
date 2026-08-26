@@ -14,8 +14,15 @@ import { InterviewListItem } from "@/features/interviews/components/interview-li
 import { ScoreBreakdown } from "./score-breakdown";
 import { FeedbackReviewDialog } from "./feedback-review-dialog";
 import type { RankedApplicantDto } from "../types";
+import type { InterviewDto } from "@/features/interviews/types";
 
 const TERMINAL: ApplicationStatus[] = ["Rejected", "Hired", "Withdrawn"];
+
+// Stable reference for the "no interviews loaded yet" case. A fresh `[] ` literal
+// inside the selector would give Zustand a new array identity on every call, and
+// since it compares by reference, that reads as "the store changed" forever —
+// triggering an infinite re-render loop (React's "Maximum update depth exceeded").
+const EMPTY_INTERVIEWS: InterviewDto[] = [];
 
 interface ApplicantRowProps {
   applicant: RankedApplicantDto;
@@ -29,7 +36,7 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
   const [firstName, lastName] = applicant.candidateName.split(" ");
   const isTerminal = TERMINAL.includes(applicant.status);
 
-  const interviews = useInterviewsStore((s) => s.byApplication[applicant.applicationId] ?? []);
+  const interviews = useInterviewsStore((s) => s.byApplication[applicant.applicationId] ?? EMPTY_INTERVIEWS);
   const loadForApplication = useInterviewsStore((s) => s.loadForApplication);
 
   useEffect(() => {
