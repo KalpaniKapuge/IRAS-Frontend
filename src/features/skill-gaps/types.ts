@@ -1,4 +1,4 @@
-import type { ImportanceLevel } from "@/types/enums";
+import type { ImportanceLevel, TargetSkillStatus } from "@/types/enums";
 
 export interface CandidateSkillGapDto {
   skillId: number;
@@ -17,4 +17,13 @@ export interface SkillGapSummaryDto {
   mustHaveCount: number;
   niceToHaveCount: number;
   totalOccurrences: number;
+}
+
+// A skill the candidate has chosen to work on after seeing it flagged as a gap.
+export interface TargetSkillDto {
+  skillId: number;
+  skillName: string;
+  status: TargetSkillStatus;
+  addedAt: string;
+  completedAt: string | null;
 }

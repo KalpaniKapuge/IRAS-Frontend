@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   Bot,
   Briefcase,
   Building2,
@@ -82,6 +83,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
         { label: "Job Postings", to: "/admin/jobs", icon: Briefcase },
         { label: "Skill Taxonomy", to: "/admin/skills", icon: Sparkles },
         { label: "Knowledge Base", to: "/admin/knowledge-base", icon: FileStack },
+        { label: "Skill Resources", to: "/admin/skill-resources", icon: BookOpen },
       ],
     },
     {

@@ -88,6 +88,12 @@ export type KnowledgeCategory = (typeof KNOWLEDGE_CATEGORIES)[number];
 export const ALIAS_SOURCES = ["AdminAdded", "ResumeParsed"] as const;
 export type AliasSource = (typeof ALIAS_SOURCES)[number];
 
+export const SKILL_RESOURCE_TYPES = ["Course", "Tutorial", "Project", "Documentation"] as const;
+export type SkillResourceType = (typeof SKILL_RESOURCE_TYPES)[number];
+
+export const TARGET_SKILL_STATUSES = ["Learning", "Completed"] as const;
+export type TargetSkillStatus = (typeof TARGET_SKILL_STATUSES)[number];
+
 export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
 export type InterviewMode = (typeof INTERVIEW_MODES)[number];
 
@@ -147,6 +153,11 @@ const interviewStatusTone: Record<InterviewStatus, BadgeTone> = {
   Cancelled: "muted",
 };
 
+const targetSkillStatusTone: Record<TargetSkillStatus, BadgeTone> = {
+  Learning: "warning",
+  Completed: "success",
+};
+
 export const ENUM_TONE_MAPS = {
   ApplicationStatus: applicationStatusTone,
   JobStatus: jobStatusTone,
@@ -155,4 +166,5 @@ export const ENUM_TONE_MAPS = {
   DeliveryStatus: deliveryStatusTone,
   ImportanceLevel: importanceTone,
   InterviewStatus: interviewStatusTone,
+  TargetSkillStatus: targetSkillStatusTone,
 } as const;

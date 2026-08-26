@@ -69,6 +69,8 @@ const SkillsAdminPage = () =>
   lazyPage(() => import("@/features/skill-taxonomy/pages/skills-admin-page").then((m) => ({ default: m.SkillsAdminPage })));
 const KnowledgeBasePage = () =>
   lazyPage(() => import("@/features/knowledge-base/pages/knowledge-base-page").then((m) => ({ default: m.KnowledgeBasePage })));
+const SkillResourcesPage = () =>
+  lazyPage(() => import("@/features/skill-resources/pages/skill-resources-page").then((m) => ({ default: m.SkillResourcesPage })));
 const SystemStatusPage = () =>
   lazyPage(() => import("@/features/system-status/pages/system-status-page").then((m) => ({ default: m.SystemStatusPage })));
 const AuditLogsPage = () =>
@@ -146,6 +148,7 @@ const router = createBrowserRouter([
           { path: "jobs", element: <JobsModerationPage /> },
           { path: "skills", element: <SkillsAdminPage /> },
           { path: "knowledge-base", element: <KnowledgeBasePage /> },
+          { path: "skill-resources", element: <SkillResourcesPage /> },
           { path: "system", element: <SystemStatusPage /> },
           { path: "audit-logs", element: <AuditLogsPage /> },
         ],
