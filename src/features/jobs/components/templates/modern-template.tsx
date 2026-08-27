@@ -3,11 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { titleCase } from "@/lib/utils";
-import { ApplyDialog } from "@/features/applications/components/apply-dialog";
 import { JobDescription } from "../job-description";
 import type { JobTemplateProps } from "./types";
 
-export function ModernTemplate({ job }: JobTemplateProps) {
+export function ModernTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
@@ -19,7 +18,7 @@ export function ModernTemplate({ job }: JobTemplateProps) {
               </p>
               <h1 className="mt-1 text-3xl font-bold tracking-tight">{job.title}</h1>
             </div>
-            <ApplyDialog jobId={job.jobId} jobTitle={job.title} />
+            {actionSlot}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-primary-foreground/90">

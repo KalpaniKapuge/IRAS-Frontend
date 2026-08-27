@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/features/auth/store";
 import { ROLE_HOME } from "@/config/nav";
 import { ApiError } from "@/types/common";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { AuthLayout } from "../components/auth-layout";
 import { FieldError } from "../components/field-error";
 import { loginSchema, flattenZodErrors } from "../validation";
@@ -23,6 +24,7 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +53,7 @@ export function LoginPage() {
 
   return (
     <AuthLayout title="Welcome back" description="Sign in to continue to your IRAS dashboard.">
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form ref={ref} onKeyDownCapture={onKeyDown} onFocus={onFocus} onSubmit={handleSubmit} noValidate className="space-y-4">
         {formError && (
           <div
             role="alert"

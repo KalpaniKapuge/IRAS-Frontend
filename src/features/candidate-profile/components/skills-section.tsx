@@ -21,7 +21,7 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
   const [pendingSkill, setPendingSkill] = useState<SkillDto | null>(null);
   const [proficiency, setProficiency] = useState<ProficiencyLevel>("Intermediate");
   const [yearsExp, setYearsExp] = useState("1");
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const handlePick = (skill: SkillDto) => {
     setPendingSkill(skill);
@@ -46,7 +46,7 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
           {pendingSkill && (
             <form
               ref={ref}
-              onKeyDown={onKeyDown}
+              onKeyDownCapture={onKeyDown} onFocus={onFocus}
               onSubmit={(e) => {
                 e.preventDefault();
                 handleAdd();

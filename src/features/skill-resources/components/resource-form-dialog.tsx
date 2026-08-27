@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ApiError } from "@/types/common";
 import { SKILL_RESOURCE_TYPES, type SkillResourceType } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { SkillPicker } from "@/features/skill-taxonomy/components/skill-picker";
 import { skillResourcesApi } from "../api";
 import type { SkillResourceDto } from "../types";
@@ -32,6 +33,7 @@ export function ResourceFormDialog({ resource, onSaved }: { resource?: SkillReso
   const [provider, setProvider] = useState(resource?.provider ?? "");
   const [isActive, setIsActive] = useState(resource?.isActive ?? true);
   const [isSaving, setIsSaving] = useState(false);
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     if (open) {
@@ -75,7 +77,16 @@ export function ResourceFormDialog({ resource, onSaved }: { resource?: SkillReso
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit skill resource" : "New skill resource"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <form
+          ref={ref}
+          onKeyDownCapture={onKeyDown} onFocus={onFocus}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          noValidate
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label>Skill</Label>
             {skillId ? (
@@ -130,13 +141,13 @@ export function ResourceFormDialog({ resource, onSaved }: { resource?: SkillReso
             <span className="text-sm font-medium">Active (visible to candidates)</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} loading={isSaving} disabled={!skillId || !title.trim() || !url.trim()}>
-            {isEditing ? "Save changes" : "Create resource"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" loading={isSaving} disabled={!skillId || !title.trim() || !url.trim()}>
+              {isEditing ? "Save changes" : "Create resource"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

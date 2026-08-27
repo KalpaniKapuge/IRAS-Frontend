@@ -26,7 +26,7 @@ export function JobCreatePage() {
     closingDate: "",
   });
   const [requiredSkills, setRequiredSkills] = useState<JobRequiredSkillDto[]>([]);
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const canSubmit = values.title.trim().length > 0 && requiredSkills.length > 0;
 
@@ -47,7 +47,7 @@ export function JobCreatePage() {
   return (
     <form
       ref={ref}
-      onKeyDown={onKeyDown}
+      onKeyDownCapture={onKeyDown} onFocus={onFocus}
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();

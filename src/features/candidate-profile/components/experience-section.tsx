@@ -50,7 +50,7 @@ export function ExperienceSection({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<WorkExperienceFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
     setEditingId(null);
@@ -95,7 +95,7 @@ export function ExperienceSection({
             </DialogHeader>
             <form
               ref={ref}
-              onKeyDown={onKeyDown}
+              onKeyDownCapture={onKeyDown} onFocus={onFocus}
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();

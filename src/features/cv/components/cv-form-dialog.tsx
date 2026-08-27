@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCvStore } from "../store";
 
 export function CvFormDialog() {
@@ -23,6 +24,7 @@ export function CvFormDialog() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [templateName, setTemplateName] = useState("");
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     if (open) {
@@ -55,7 +57,16 @@ export function CvFormDialog() {
           <DialogTitle>Create a new CV</DialogTitle>
           <DialogDescription>Choose a template and give it a name — you can customize everything after.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
+        <form
+          ref={ref}
+          onKeyDownCapture={onKeyDown} onFocus={onFocus}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreate();
+          }}
+          noValidate
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label>CV title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Backend Engineer CV" />
@@ -79,13 +90,13 @@ export function CvFormDialog() {
               ))}
             </div>
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleCreate} loading={isSaving} disabled={!title.trim() || !templateName}>
-            Create CV
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" loading={isSaving} disabled={!title.trim() || !templateName}>
+              Create CV
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

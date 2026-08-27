@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ApiError } from "@/types/common";
 import { KNOWLEDGE_CATEGORIES, type KnowledgeCategory } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { knowledgeBaseApi } from "../api";
 import type { KnowledgeBaseDto } from "../types";
 
@@ -29,6 +30,7 @@ export function KbFormDialog({ entry, onSaved }: { entry?: KnowledgeBaseDto; onS
   const [category, setCategory] = useState<KnowledgeCategory>(entry?.category ?? "FAQ");
   const [isActive, setIsActive] = useState(entry?.isActive ?? true);
   const [isSaving, setIsSaving] = useState(false);
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     if (open) {
@@ -68,7 +70,16 @@ export function KbFormDialog({ entry, onSaved }: { entry?: KnowledgeBaseDto; onS
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit knowledge base entry" : "New knowledge base entry"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <form
+          ref={ref}
+          onKeyDownCapture={onKeyDown} onFocus={onFocus}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          noValidate
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label>Title</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. How is my application score calculated?" />
@@ -92,13 +103,13 @@ export function KbFormDialog({ entry, onSaved }: { entry?: KnowledgeBaseDto; onS
             <span className="text-sm font-medium">Active (visible to the chatbot)</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} loading={isSaving} disabled={!title.trim() || !content.trim()}>
-            {isEditing ? "Save changes" : "Create entry"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" loading={isSaving} disabled={!title.trim() || !content.trim()}>
+              {isEditing ? "Save changes" : "Create entry"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

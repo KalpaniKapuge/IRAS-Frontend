@@ -12,6 +12,7 @@ import { ROLE_HOME } from "@/config/nav";
 import { ApiError } from "@/types/common";
 import type { UserRole } from "@/types/enums";
 import { mapBackendFieldErrors } from "@/lib/field-errors";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { AuthLayout } from "../components/auth-layout";
 import { FieldError } from "../components/field-error";
 import { PasswordStrength } from "../components/password-strength";
@@ -33,6 +34,7 @@ export function RegisterPage() {
   const [companyName, setCompanyName] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const handleRoleChange = (value: string) => {
     setRole(value as FormRole);
@@ -103,7 +105,7 @@ export function RegisterPage() {
         </TabsList>
       </Tabs>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form ref={ref} onKeyDownCapture={onKeyDown} onFocus={onFocus} onSubmit={handleSubmit} noValidate className="space-y-4">
         {formError && (
           <div
             role="alert"

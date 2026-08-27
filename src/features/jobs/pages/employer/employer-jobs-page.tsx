@@ -4,6 +4,7 @@ import { Briefcase, Plus, Users } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RowSkeletonList } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -67,7 +68,10 @@ export function EmployerJobsPage() {
                   <StatusBadge enumName="JobStatus" value={job.status} />
                   {job.status === "Published" && (
                     <Button variant="outline" size="sm" asChild>
-                      <Link to={`/employer/jobs/${job.jobId}/applicants`}><Users className="h-3.5 w-3.5" /> Applicants</Link>
+                      <Link to={`/employer/jobs/${job.jobId}/applicants`}>
+                        <Users className="h-3.5 w-3.5" /> Applicants
+                        <Badge variant="secondary" className="ml-1 px-1.5">{job.applicationCount}</Badge>
+                      </Link>
                     </Button>
                   )}
                   <Button variant="secondary" size="sm" asChild>

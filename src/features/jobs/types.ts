@@ -28,6 +28,7 @@ export interface JobDto {
   postedAt: string | null;
   closingDate: string | null;
   templateKey: string | null;
+  applicationCount: number;
   requiredSkills: JobRequiredSkillDto[];
 }
 
@@ -43,6 +44,7 @@ export interface JobSummaryDto {
   closingDate: string | null;
   templateKey: string | null;
   requiredSkillCount: number;
+  applicationCount: number;
 }
 
 export interface CreateJobRequest {

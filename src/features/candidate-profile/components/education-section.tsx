@@ -36,7 +36,7 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<EducationFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
     setEditingId(null);
@@ -77,7 +77,7 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
             </DialogHeader>
             <form
               ref={ref}
-              onKeyDown={onKeyDown}
+              onKeyDownCapture={onKeyDown} onFocus={onFocus}
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();

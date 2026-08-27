@@ -6,6 +6,7 @@ import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useJobsStore } from "../store";
 import { JOB_TEMPLATES } from "../components/templates";
+import { ApplyDialog } from "@/features/applications/components/apply-dialog";
 import type { JobTemplateKey } from "../types";
 
 export function JobDetailPage() {
@@ -40,7 +41,7 @@ export function JobDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Back
       </Button>
 
-      <Template job={job} />
+      <Template job={job} actionSlot={<ApplyDialog jobId={job.jobId} jobTitle={job.title} />} />
     </div>
   );
 }

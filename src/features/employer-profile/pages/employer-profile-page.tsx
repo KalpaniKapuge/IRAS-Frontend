@@ -44,7 +44,7 @@ export function EmployerProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employerId]);
 
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   if (!profile) return <PageSpinner label="Loading company profile…" />;
 
@@ -71,7 +71,7 @@ export function EmployerProfilePage() {
   return (
     <form
       ref={ref}
-      onKeyDown={onKeyDown}
+      onKeyDownCapture={onKeyDown} onFocus={onFocus}
       onSubmit={(e) => {
         e.preventDefault();
         handleSave();

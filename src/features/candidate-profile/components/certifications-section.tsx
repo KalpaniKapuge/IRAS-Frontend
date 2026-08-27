@@ -69,7 +69,7 @@ export function CertificationsSection({
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const existingFileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
-  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -124,7 +124,7 @@ export function CertificationsSection({
             </DialogHeader>
             <form
               ref={ref}
-              onKeyDown={onKeyDown}
+              onKeyDownCapture={onKeyDown} onFocus={onFocus}
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +15,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { INTERVIEW_MODES, type InterviewMode } from "@/types/enums";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useInterviewsStore } from "../store";
 import type { InterviewDto } from "../types";
+
+const MEETING_PROVIDERS = [
+  { key: "zoom", label: "Zoom", createUrl: "https://zoom.us/meeting/schedule" },
+  { key: "meet", label: "Google Meet", createUrl: "https://meet.google.com/new" },
+  { key: "teams", label: "Microsoft Teams", createUrl: "https://teams.microsoft.com/l/meeting/new" },
+] as const;
+type MeetingProviderKey = (typeof MEETING_PROVIDERS)[number]["key"];
 
 interface ScheduleInterviewDialogProps {
   employerId: number;
@@ -51,9 +59,11 @@ export function ScheduleInterviewDialog({
   const [durationMinutes, setDurationMinutes] = useState("60");
   const [mode, setMode] = useState<InterviewMode>("Remote");
   const [location, setLocation] = useState("");
+  const [meetingProvider, setMeetingProvider] = useState<MeetingProviderKey>("zoom");
   const [meetingLink, setMeetingLink] = useState("");
   const [interviewerNames, setInterviewerNames] = useState("");
   const [notes, setNotes] = useState("");
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     if (!open) return;
@@ -61,10 +71,16 @@ export function ScheduleInterviewDialog({
     setDurationMinutes(String(existing?.durationMinutes ?? 60));
     setMode(existing?.mode ?? "Remote");
     setLocation(existing?.location ?? "");
+    setMeetingProvider("zoom");
     setMeetingLink(existing?.meetingLink ?? "");
     setInterviewerNames(existing?.interviewerNames ?? "");
     setNotes(existing?.notes ?? "");
   }, [open, existing]);
+
+  const createMeeting = () => {
+    const provider = MEETING_PROVIDERS.find((p) => p.key === meetingProvider);
+    if (provider) window.open(provider.createUrl, "_blank", "noopener,noreferrer");
+  };
 
   const canSubmit =
     scheduledAt.length > 0 &&
@@ -98,7 +114,16 @@ export function ScheduleInterviewDialog({
           <DialogDescription>With {candidateName}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <form
+          ref={ref}
+          onKeyDownCapture={onKeyDown} onFocus={onFocus}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          noValidate
+          className="space-y-4"
+        >
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Date & time</Label>
@@ -129,9 +154,35 @@ export function ScheduleInterviewDialog({
             </div>
           )}
           {mode === "Remote" && (
-            <div className="space-y-2">
-              <Label>Meeting link</Label>
-              <Input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} placeholder="https://…" />
+            <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
+              <div className="space-y-2">
+                <Label>Meeting provider</Label>
+                <Select value={meetingProvider} onValueChange={(v) => setMeetingProvider(v as MeetingProviderKey)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {MEETING_PROVIDERS.map((p) => (
+                      <SelectItem key={p.key} value={p.key}>{p.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Meeting link</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="https://…"
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="secondary" className="gap-1.5 shrink-0" onClick={createMeeting}>
+                    <ExternalLink className="h-3.5 w-3.5" /> Create meeting
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Opens {MEETING_PROVIDERS.find((p) => p.key === meetingProvider)?.label} to create a real meeting — paste the link it gives you back here.
+                </p>
+              </div>
             </div>
           )}
 
@@ -143,14 +194,14 @@ export function ScheduleInterviewDialog({
             <Label>Notes</Label>
             <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Anything the candidate should prepare…" />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} loading={isMutating} disabled={!canSubmit}>
-            {existing ? "Save changes" : "Schedule"}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="submit" loading={isMutating} disabled={!canSubmit}>
+              {existing ? "Save changes" : "Schedule"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

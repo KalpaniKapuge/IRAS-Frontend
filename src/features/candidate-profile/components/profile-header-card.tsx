@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EDUCATION_LEVELS } from "@/types/enums";
 import { getInitials, titleCase } from "@/lib/utils";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { CandidateProfileDto } from "../types";
 
@@ -33,6 +34,7 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
   const [linkedInUrl, setLinkedInUrl] = useState(profile.linkedInUrl ?? "");
   const [educationLevel, setEducationLevel] = useState(profile.educationLevel);
   const [optInMatching, setOptInMatching] = useState(profile.optInMatching);
+  const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     setFirstName(profile.firstName);
@@ -172,7 +174,16 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <form
+            ref={ref}
+            onKeyDownCapture={onKeyDown} onFocus={onFocus}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            noValidate
+            className="space-y-4"
+          >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>First name</Label>
@@ -244,11 +255,11 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
               <Switch checked={optInMatching} onCheckedChange={setOptInMatching} />
             </div>
             <div className="flex justify-end">
-              <Button onClick={handleSave} loading={isSaving}>
+              <Button type="submit" loading={isSaving}>
                 Save changes
               </Button>
             </div>
-          </div>
+          </form>
         )}
       </CardContent>
     </Card>
