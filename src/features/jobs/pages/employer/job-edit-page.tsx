@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Sparkles, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Pencil, Sparkles, Trash2, Users, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,24 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { useAuthStore } from "@/features/auth/store";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useJobsStore } from "../../store";
+import { RequiredSkillsEditor } from "../../components/required-skills-editor";
+import { JobRoleFields, type JobRoleFieldsValue } from "../../components/job-role-fields";
+import { TemplatePicker } from "../../components/template-picker";
+import type { JobDto, JobRequiredSkillDto, JobTemplateKey } from "../../types";
+
+function toRoleFieldsValue(job: JobDto): JobRoleFieldsValue {
+  return {
+    title: job.title,
+    seniorityLevel: job.seniorityLevel,
+    minExpYears: String(job.minExpYears),
+    educationReq: job.educationReq,
+    employmentType: job.employmentType,
+    location: job.location ?? "",
+    closingDate: job.closingDate ? job.closingDate.slice(0, 10) : "",
+  };
+}
 
 export function JobEditPage() {
   const { jobId } = useParams();
@@ -24,6 +41,7 @@ export function JobEditPage() {
     loadMyJob,
     generateJd,
     updateJd,
+    updateJob,
     publish,
     close,
     deleteDraft,
@@ -33,6 +51,12 @@ export function JobEditPage() {
   const [notes, setNotes] = useState("");
   const [jdDraft, setJdDraft] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [templateKey, setTemplateKey] = useState<JobTemplateKey | null>(null);
+
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editValues, setEditValues] = useState<JobRoleFieldsValue | null>(null);
+  const [editSkills, setEditSkills] = useState<JobRequiredSkillDto[]>([]);
+  const { ref: editFormRef, onKeyDown: editFormOnKeyDown } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
     if (jobId) loadMyJob(employerId, Number(jobId));
@@ -43,12 +67,14 @@ export function JobEditPage() {
   useEffect(() => {
     setJdDraft(currentJob?.generatedJd ?? "");
     setDirty(false);
-  }, [currentJob?.generatedJd]);
+    setTemplateKey((currentJob?.templateKey as JobTemplateKey | null) ?? null);
+  }, [currentJob?.generatedJd, currentJob?.templateKey]);
 
   if (isLoadingDetail || !currentJob) return <PageSpinner label="Loading job…" />;
 
   const job = currentJob;
   const isDraft = job.status === "Draft";
+  const canEditDetails = job.status === "Draft" || job.status === "Published";
 
   const handleGenerate = async () => {
     await generateJd(employerId, job.jobId, { additionalNotes: notes || undefined });
@@ -59,7 +85,44 @@ export function JobEditPage() {
     setDirty(false);
   };
 
+  const startEditingDetails = () => {
+    setEditValues(toRoleFieldsValue(job));
+    setEditSkills(job.requiredSkills.map((s) => ({ ...s })));
+    setIsEditingDetails(true);
+  };
+
+  const handleSaveDetails = async () => {
+    if (!editValues) return;
+    const ok = await updateJob(employerId, job.jobId, {
+      title: editValues.title.trim(),
+      seniorityLevel: editValues.seniorityLevel,
+      minExpYears: Number(editValues.minExpYears) || 0,
+      educationReq: editValues.educationReq,
+      employmentType: editValues.employmentType,
+      location: editValues.location || undefined,
+      closingDate: editValues.closingDate || undefined,
+      requiredSkills: editSkills,
+      templateKey: templateKey ?? job.templateKey ?? undefined,
+    });
+    if (ok) setIsEditingDetails(false);
+  };
+
   const handlePublish = async () => {
+    if (!templateKey) return;
+    if (templateKey !== job.templateKey) {
+      const ok = await updateJob(employerId, job.jobId, {
+        title: job.title,
+        seniorityLevel: job.seniorityLevel,
+        minExpYears: job.minExpYears,
+        educationReq: job.educationReq,
+        employmentType: job.employmentType,
+        location: job.location ?? undefined,
+        closingDate: job.closingDate ?? undefined,
+        requiredSkills: job.requiredSkills,
+        templateKey,
+      });
+      if (!ok) return;
+    }
     const ok = await publish(employerId, job.jobId);
     if (ok) navigate(`/employer/jobs/${job.jobId}/applicants`);
   };
@@ -142,16 +205,55 @@ export function JobEditPage() {
 
         <div className="space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Required skills</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-base">Role details</CardTitle>
+              {canEditDetails && !isEditingDetails && (
+                <Button variant="ghost" size="sm" className="gap-1.5" onClick={startEditingDetails}>
+                  <Pencil className="h-3.5 w-3.5" /> Edit
+                </Button>
+              )}
+              {isEditingDetails && (
+                <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setIsEditingDetails(false)}>
+                  <X className="h-3.5 w-3.5" /> Cancel
+                </Button>
+              )}
             </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              {job.requiredSkills.map((s) => (
-                <Badge key={s.skillId} variant={s.importance === "MustHave" ? "destructive" : "muted"}>
-                  {s.skillName}
-                  {s.minYears > 0 && <span className="opacity-70"> · {s.minYears}y+</span>}
-                </Badge>
-              ))}
+            <CardContent className="space-y-4">
+              {isEditingDetails && editValues ? (
+                <form
+                  ref={editFormRef}
+                  onKeyDown={editFormOnKeyDown}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSaveDetails();
+                  }}
+                  noValidate
+                  className="space-y-4"
+                >
+                  <JobRoleFields
+                    values={editValues}
+                    onChange={(patch) => setEditValues((v) => (v ? { ...v, ...patch } : v))}
+                  />
+                  <RequiredSkillsEditor value={editSkills} onChange={setEditSkills} />
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    loading={isMutating}
+                    disabled={!editValues.title.trim() || editSkills.length === 0}
+                  >
+                    Save changes
+                  </Button>
+                </form>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {job.requiredSkills.map((s) => (
+                    <Badge key={s.skillId} variant={s.importance === "MustHave" ? "destructive" : "muted"}>
+                      {s.skillName}
+                      {s.minYears > 0 && <span className="opacity-70"> · {s.minYears}y+</span>}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -159,11 +261,15 @@ export function JobEditPage() {
             <CardHeader>
               <CardTitle className="text-base">Lifecycle</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3">
               {isDraft && (
                 <>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Choose a template</p>
+                    <TemplatePicker value={templateKey} onChange={setTemplateKey} />
+                  </div>
                   <ConfirmAction
-                    trigger={<Button className="w-full" disabled={!job.generatedJd}>Publish job</Button>}
+                    trigger={<Button className="w-full" disabled={!job.generatedJd || !templateKey}>Publish job</Button>}
                     title="Publish this job?"
                     description="It will become visible to all candidates and trigger automatic matching."
                     confirmLabel="Publish"
@@ -187,7 +293,7 @@ export function JobEditPage() {
                 <ConfirmAction
                   trigger={<Button variant="outline" className="w-full">Close job</Button>}
                   title="Close this job posting?"
-                  description="Candidates will no longer be able to apply."
+                  description="Candidates will no longer be able to apply. This replaces deletion for live postings — published jobs can't be permanently removed once candidates may have applied."
                   confirmLabel="Close job"
                   onConfirm={() => close(employerId, job.jobId)}
                 />

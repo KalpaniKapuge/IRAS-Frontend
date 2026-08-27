@@ -6,6 +6,7 @@ import type {
   JobDto,
   JobSummaryDto,
   UpdateJdRequest,
+  UpdateJobRequest,
 } from "./types";
 
 export const jobsApi = {
@@ -16,6 +17,9 @@ export const jobsApi = {
   // ---- Employer management ----
   create: (employerId: number, payload: CreateJobRequest) =>
     http.post<JobDto>(`/api/employers/${employerId}/jobs`, payload).then((r) => r.data),
+
+  update: (employerId: number, jobId: number, payload: UpdateJobRequest) =>
+    http.put<JobDto>(`/api/employers/${employerId}/jobs/${jobId}`, payload).then((r) => r.data),
 
   getMine: (employerId: number) => http.get<JobSummaryDto[]>(`/api/employers/${employerId}/jobs`).then((r) => r.data),
 

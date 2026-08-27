@@ -8,6 +8,9 @@ export interface JobRequiredSkillDto {
   minYears: number;
 }
 
+export const JOB_TEMPLATE_KEYS = ["modern", "classic", "bold"] as const;
+export type JobTemplateKey = (typeof JOB_TEMPLATE_KEYS)[number];
+
 export interface JobDto {
   jobId: number;
   employerId: number;
@@ -24,6 +27,7 @@ export interface JobDto {
   status: JobStatus;
   postedAt: string | null;
   closingDate: string | null;
+  templateKey: string | null;
   requiredSkills: JobRequiredSkillDto[];
 }
 
@@ -37,6 +41,7 @@ export interface JobSummaryDto {
   status: JobStatus;
   postedAt: string | null;
   closingDate: string | null;
+  templateKey: string | null;
   requiredSkillCount: number;
 }
 
@@ -49,6 +54,18 @@ export interface CreateJobRequest {
   location?: string;
   closingDate?: string | null;
   requiredSkills: JobRequiredSkillDto[];
+}
+
+export interface UpdateJobRequest {
+  title: string;
+  seniorityLevel: string;
+  minExpYears: number;
+  educationReq: EducationLevel;
+  employmentType: EmploymentType;
+  location?: string | null;
+  closingDate?: string | null;
+  requiredSkills: JobRequiredSkillDto[];
+  templateKey?: string | null;
 }
 
 export interface GenerateJdRequest {

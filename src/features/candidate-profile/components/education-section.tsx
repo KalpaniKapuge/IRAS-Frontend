@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { EducationDto, EducationFormValues } from "../types";
 
@@ -35,6 +36,7 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<EducationFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
     setEditingId(null);
@@ -73,7 +75,16 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
             <DialogHeader>
               <DialogTitle>{editingId ? "Edit education" : "Add education"}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <form
+              ref={ref}
+              onKeyDown={onKeyDown}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              noValidate
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label>Degree</Label>
                 <Input value={form.degree} onChange={(e) => setForm({ ...form, degree: e.target.value })} />
@@ -111,15 +122,15 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
                   <Input value={form.grade ?? ""} onChange={(e) => setForm({ ...form, grade: e.target.value })} />
                 </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSubmit} loading={saving} disabled={!form.degree || !form.institution}>
-                Save
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" loading={saving} disabled={!form.degree || !form.institution}>
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardHeader>

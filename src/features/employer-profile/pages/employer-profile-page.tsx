@@ -12,6 +12,7 @@ import { PageSpinner } from "@/components/shared/loading-state";
 import { ApiError } from "@/types/common";
 import { COMPANY_SIZES, type CompanySize } from "@/types/enums";
 import { useAuthStore } from "@/features/auth/store";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { employerProfileApi } from "../api";
 import type { EmployerProfileDto } from "../types";
 
@@ -43,6 +44,8 @@ export function EmployerProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employerId]);
 
+  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
+
   if (!profile) return <PageSpinner label="Loading company profile…" />;
 
   const handleSave = async () => {
@@ -66,7 +69,16 @@ export function EmployerProfilePage() {
   };
 
   return (
-    <div className="space-y-6">
+    <form
+      ref={ref}
+      onKeyDown={onKeyDown}
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSave();
+      }}
+      noValidate
+      className="space-y-6"
+    >
       <PageHeader title="Company Profile" description="This information appears on your job postings and helps candidates learn about you." />
 
       <Card>
@@ -116,10 +128,10 @@ export function EmployerProfilePage() {
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleSave} loading={isSaving}>Save changes</Button>
+            <Button type="submit" loading={isSaving}>Save changes</Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </form>
   );
 }

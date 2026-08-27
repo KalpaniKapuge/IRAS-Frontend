@@ -17,6 +17,7 @@ import {
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/format";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { WorkExperienceDto, WorkExperienceFormValues } from "../types";
 
@@ -49,6 +50,7 @@ export function ExperienceSection({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<WorkExperienceFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
     setEditingId(null);
@@ -91,7 +93,16 @@ export function ExperienceSection({
             <DialogHeader>
               <DialogTitle>{editingId ? "Edit experience" : "Add experience"}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <form
+              ref={ref}
+              onKeyDown={onKeyDown}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              noValidate
+              className="space-y-4"
+            >
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Job title</Label>
@@ -137,19 +148,19 @@ export function ExperienceSection({
                   placeholder="Key responsibilities and achievements…"
                 />
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                loading={saving}
-                disabled={!form.jobTitle || !form.companyName || !form.startDate}
-              >
-                Save
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  loading={saving}
+                  disabled={!form.jobTitle || !form.companyName || !form.startDate}
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardHeader>

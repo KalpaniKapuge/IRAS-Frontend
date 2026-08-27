@@ -1,25 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Menu, Settings, User as UserIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { useAuthStore } from "@/features/auth/store";
-import { ROLE_HOME, ROLE_LABEL } from "@/config/nav";
+import { ROLE_HOME } from "@/config/nav";
 import { useUiStore } from "@/stores/ui-store";
 import { getInitials } from "@/lib/utils";
+import type { UserRole } from "@/types/enums";
+
+const PROFILE_ROUTE: Partial<Record<UserRole, string>> = {
+  Candidate: "/candidate/profile",
+  Employer: "/employer/profile",
+};
 
 export function Topbar() {
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
   const setMobileNavOpen = useUiStore((s) => s.setMobileNavOpen);
   const navigate = useNavigate();
 
@@ -43,35 +40,15 @@ export function Topbar() {
       <div className="flex items-center gap-1.5">
         <ThemeToggle />
         <NotificationBell />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="ml-1 flex items-center gap-2 rounded-full pr-1 transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>{getInitials(firstName, lastName)}</AvatarFallback>
-              </Avatar>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <p className="truncate text-sm font-medium">{user.email}</p>
-              <p className="text-xs font-normal text-muted-foreground">{ROLE_LABEL[user.role]}</p>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate(ROLE_HOME[user.role])}>
-              <UserIcon />
-              Dashboard
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <Settings />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={logout}>
-              <LogOut />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <button
+          className="ml-1 flex items-center gap-2 rounded-full pr-1 transition-colors hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={() => navigate(PROFILE_ROUTE[user.role] ?? ROLE_HOME[user.role])}
+          aria-label="Go to profile"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{getInitials(firstName, lastName)}</AvatarFallback>
+          </Avatar>
+        </button>
       </div>
     </header>
   );

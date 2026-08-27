@@ -50,6 +50,15 @@ export function SkillPicker({ onSelect, excludeIds = [], placeholder = "Search s
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
+          onKeyDown={(e) => {
+            if (e.key !== "Enter" || visible.length === 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const skill = visible[0];
+            onSelect(skill);
+            setQuery("");
+            setResults([]);
+          }}
           placeholder={placeholder}
           className="pl-9 pr-9"
         />

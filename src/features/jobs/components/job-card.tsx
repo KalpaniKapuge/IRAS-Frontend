@@ -3,13 +3,21 @@ import { ArrowUpRight, BriefcaseBusiness, Building2, CalendarClock, MapPin, Spar
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
-import { titleCase } from "@/lib/utils";
-import type { JobSummaryDto } from "../types";
+import { cn, titleCase } from "@/lib/utils";
+import { TEMPLATE_ACCENT } from "./templates";
+import type { JobSummaryDto, JobTemplateKey } from "../types";
 
 export function JobCard({ job, to }: { job: JobSummaryDto; to: string }) {
+  const accent = TEMPLATE_ACCENT[(job.templateKey as JobTemplateKey) ?? "modern"] ?? TEMPLATE_ACCENT.modern;
+
   return (
     <Link to={to} className="group block h-full">
-      <Card className="h-full overflow-hidden border-border/80 bg-card/95 shadow-soft transition-all group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:shadow-elevated">
+      <Card
+        className={cn(
+          "h-full overflow-hidden border-t-4 border-border/80 bg-card/95 shadow-soft transition-all group-hover:-translate-y-0.5 group-hover:shadow-elevated",
+          accent.border,
+        )}
+      >
         <CardContent className="flex h-full flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">

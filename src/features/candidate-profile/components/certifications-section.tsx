@@ -16,6 +16,7 @@ import {
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/format";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { CertificationDto, CertificationFormValues } from "../types";
 
@@ -68,6 +69,7 @@ export function CertificationsSection({
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const existingFileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -120,7 +122,16 @@ export function CertificationsSection({
             <DialogHeader>
               <DialogTitle>Add certification</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <form
+              ref={ref}
+              onKeyDown={onKeyDown}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+              noValidate
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label>Name</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -166,15 +177,15 @@ export function CertificationsSection({
                   </Button>
                 </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSubmit} loading={saving} disabled={!form.name.trim()}>
-                Save
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" loading={saving} disabled={!form.name.trim()}>
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </CardHeader>

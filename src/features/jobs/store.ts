@@ -8,6 +8,7 @@ import type {
   JobDto,
   JobSummaryDto,
   UpdateJdRequest,
+  UpdateJobRequest,
 } from "./types";
 
 interface JobsState {
@@ -24,6 +25,7 @@ interface JobsState {
   loadMyJobs: (employerId: number) => Promise<void>;
   loadMyJob: (employerId: number, jobId: number) => Promise<void>;
   createJob: (employerId: number, payload: CreateJobRequest) => Promise<JobDto | null>;
+  updateJob: (employerId: number, jobId: number, payload: UpdateJobRequest) => Promise<boolean>;
   generateJd: (employerId: number, jobId: number, payload: GenerateJdRequest) => Promise<void>;
   updateJd: (employerId: number, jobId: number, payload: UpdateJdRequest) => Promise<void>;
   publish: (employerId: number, jobId: number) => Promise<boolean>;
@@ -98,6 +100,21 @@ export const useJobsStore = create<JobsState>()((set, get) => ({
     } catch (err) {
       handle(err, "Failed to create job.");
       return null;
+    } finally {
+      set({ isMutating: false });
+    }
+  },
+
+  updateJob: async (employerId, jobId, payload) => {
+    set({ isMutating: true });
+    try {
+      const currentJob = await jobsApi.update(employerId, jobId, payload);
+      set({ currentJob });
+      toast.success("Job updated.");
+      return true;
+    } catch (err) {
+      handle(err, "Failed to update job.");
+      return false;
     } finally {
       set({ isMutating: false });
     }

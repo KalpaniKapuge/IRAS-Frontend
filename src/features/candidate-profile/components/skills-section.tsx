@@ -10,6 +10,7 @@ import { SkillPicker } from "@/features/skill-taxonomy/components/skill-picker";
 import type { SkillDto } from "@/features/skill-taxonomy/types";
 import { PROFICIENCY_LEVELS, type ProficiencyLevel } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { CandidateSkillDto } from "../types";
 
@@ -20,6 +21,7 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
   const [pendingSkill, setPendingSkill] = useState<SkillDto | null>(null);
   const [proficiency, setProficiency] = useState<ProficiencyLevel>("Intermediate");
   const [yearsExp, setYearsExp] = useState("1");
+  const { ref, onKeyDown } = useEnterKeyNav<HTMLFormElement>();
 
   const handlePick = (skill: SkillDto) => {
     setPendingSkill(skill);
@@ -42,7 +44,16 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
         <div className="space-y-3 rounded-lg border border-dashed border-border p-4">
           <SkillPicker onSelect={handlePick} excludeIds={skills.map((s) => s.skillId)} />
           {pendingSkill && (
-            <div className="flex flex-wrap items-end gap-3 rounded-lg bg-muted/50 p-3">
+            <form
+              ref={ref}
+              onKeyDown={onKeyDown}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAdd();
+              }}
+              noValidate
+              className="flex flex-wrap items-end gap-3 rounded-lg bg-muted/50 p-3"
+            >
               <Badge variant="default" className="h-9 px-3 text-sm">
                 {pendingSkill.skillName}
               </Badge>
@@ -68,9 +79,9 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
                   onChange={(e) => setYearsExp(e.target.value)}
                 />
               </div>
-              <Button size="sm" onClick={handleAdd}>Add skill</Button>
-              <Button size="sm" variant="ghost" onClick={() => setPendingSkill(null)}>Cancel</Button>
-            </div>
+              <Button type="submit" size="sm">Add skill</Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setPendingSkill(null)}>Cancel</Button>
+            </form>
           )}
         </div>
 

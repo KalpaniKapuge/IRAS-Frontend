@@ -63,6 +63,7 @@ export function RequiredSkillsEditor({ value, onChange }: RequiredSkillsEditorPr
                 yrs min
               </div>
               <button
+                type="button"
                 onClick={() => removeSkill(skill.skillId)}
                 className="ml-auto rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 aria-label={`Remove ${skill.skillName}`}
