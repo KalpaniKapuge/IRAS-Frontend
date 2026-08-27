@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Building2 } from "lucide-react";
+import { Building2, Camera } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,15 @@ import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { employerProfileApi } from "../api";
 import type { EmployerProfileDto } from "../types";
 
+const LOGO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+
 export function EmployerProfilePage() {
   const employerId = useAuthStore((s) => s.user!.userId);
   const [profile, setProfile] = useState<EmployerProfileDto | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [companyName, setCompanyName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -68,6 +73,33 @@ export function EmployerProfilePage() {
     }
   };
 
+  const handleLogoChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!LOGO_TYPES.includes(file.type)) {
+      toast.error("Upload a JPG, PNG, or WebP logo.");
+      return;
+    }
+
+    if (file.size > LOGO_MAX_BYTES) {
+      toast.error("Company logo must be 2 MB or smaller.");
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const updated = await employerProfileApi.uploadLogo(employerId, file);
+      setProfile(updated);
+      toast.success("Company logo updated.");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to upload company logo.");
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
   return (
     <form
       ref={ref}
@@ -84,8 +116,33 @@ export function EmployerProfilePage() {
       <Card>
         <CardContent className="space-y-5 p-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Building2 className="h-6 w-6" />
+            <div className="relative">
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-border bg-primary/10 text-primary">
+                {profile.logoUrl ? (
+                  <img src={profile.logoUrl} alt={`${profile.companyName} logo`} className="h-full w-full object-cover" />
+                ) : (
+                  <Building2 className="h-6 w-6" />
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={LOGO_TYPES.join(",")}
+                className="hidden"
+                onChange={handleLogoChange}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                loading={isUploadingLogo}
+                disabled={isUploadingLogo}
+                className="absolute -bottom-1.5 -right-1.5 h-6 w-6 rounded-full border border-background shadow-soft"
+                aria-label="Upload company logo"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {!isUploadingLogo && <Camera className="h-3 w-3" />}
+              </Button>
             </div>
             <div>
               <p className="font-semibold">{profile.companyName}</p>

@@ -8,6 +8,7 @@ export interface EmployerProfileDto {
   website: string | null;
   location: string | null;
   description: string | null;
+  logoUrl: string | null;
 }
 
 export interface UpdateEmployerProfileRequest {
