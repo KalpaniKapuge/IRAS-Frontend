@@ -31,6 +31,8 @@ const JobMatchesPage = () =>
   lazyPage(() => import("@/features/job-matches/pages/job-matches-page").then((m) => ({ default: m.JobMatchesPage })));
 const SkillGapsPage = () =>
   lazyPage(() => import("@/features/skill-gaps/pages/skill-gaps-page").then((m) => ({ default: m.SkillGapsPage })));
+const PlanDetailPage = () =>
+  lazyPage(() => import("@/features/skill-improvement-plans/pages/plan-detail-page").then((m) => ({ default: m.PlanDetailPage })));
 const CandidateProfilePage = () =>
   lazyPage(() => import("@/features/candidate-profile/pages/candidate-profile-page").then((m) => ({ default: m.CandidateProfilePage })));
 const ResumesPage = () =>
@@ -105,6 +107,7 @@ const router = createBrowserRouter([
           { path: "applications", element: <MyApplicationsPage /> },
           { path: "matches", element: <JobMatchesPage /> },
           { path: "skill-gaps", element: <SkillGapsPage /> },
+          { path: "skill-plans/:planId", element: <PlanDetailPage /> },
           { path: "profile", element: <CandidateProfilePage /> },
           { path: "resumes", element: <ResumesPage /> },
           { path: "cvs", element: <CvListPage /> },

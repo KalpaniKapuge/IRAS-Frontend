@@ -94,6 +94,15 @@ export type SkillResourceType = (typeof SKILL_RESOURCE_TYPES)[number];
 export const TARGET_SKILL_STATUSES = ["Learning", "Completed"] as const;
 export type TargetSkillStatus = (typeof TARGET_SKILL_STATUSES)[number];
 
+export const SKILL_PLAN_PRIORITIES = ["High", "Medium", "Low"] as const;
+export type SkillPlanPriority = (typeof SKILL_PLAN_PRIORITIES)[number];
+
+export const SKILL_TARGET_LEVELS = ["Beginner", "Intermediate", "JobReady"] as const;
+export type SkillTargetLevel = (typeof SKILL_TARGET_LEVELS)[number];
+
+export const SKILL_PLAN_STATUSES = ["NotStarted", "Learning", "Practicing", "Completed", "Verified"] as const;
+export type SkillPlanStatus = (typeof SKILL_PLAN_STATUSES)[number];
+
 export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
 export type InterviewMode = (typeof INTERVIEW_MODES)[number];
 
@@ -158,6 +167,20 @@ const targetSkillStatusTone: Record<TargetSkillStatus, BadgeTone> = {
   Completed: "success",
 };
 
+const skillPlanPriorityTone: Record<SkillPlanPriority, BadgeTone> = {
+  High: "destructive",
+  Medium: "warning",
+  Low: "muted",
+};
+
+const skillPlanStatusTone: Record<SkillPlanStatus, BadgeTone> = {
+  NotStarted: "muted",
+  Learning: "info",
+  Practicing: "warning",
+  Completed: "success",
+  Verified: "primary",
+};
+
 export const ENUM_TONE_MAPS = {
   ApplicationStatus: applicationStatusTone,
   JobStatus: jobStatusTone,
@@ -167,4 +190,6 @@ export const ENUM_TONE_MAPS = {
   ImportanceLevel: importanceTone,
   InterviewStatus: interviewStatusTone,
   TargetSkillStatus: targetSkillStatusTone,
+  SkillPlanPriority: skillPlanPriorityTone,
+  SkillPlanStatus: skillPlanStatusTone,
 } as const;

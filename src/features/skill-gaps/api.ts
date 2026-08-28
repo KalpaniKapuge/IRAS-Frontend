@@ -1,4 +1,5 @@
 import { http } from "@/lib/api-client";
+import type { SkillImprovementPlanDto } from "@/features/skill-improvement-plans/types";
 import type { CandidateSkillGapDto, SkillGapSummaryDto, TargetSkillDto } from "./types";
 
 export const skillGapsApi = {
@@ -21,4 +22,11 @@ export const skillGapsApi = {
 
   removeTargetSkill: (candidateId: number, skillId: number) =>
     http.delete(`/api/candidates/${candidateId}/skill-gaps/target-skills/${skillId}`).then((r) => r.data),
+
+  // Idempotent on the backend — calling this again for a skill that already has a plan
+  // just returns the existing plan rather than regenerating it.
+  generatePlan: (candidateId: number, skillId: number, jobId?: number) =>
+    http
+      .post<SkillImprovementPlanDto>(`/api/candidates/${candidateId}/skill-gaps/${skillId}/generate-plan`, { jobId })
+      .then((r) => r.data),
 };
