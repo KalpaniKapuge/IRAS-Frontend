@@ -65,18 +65,28 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
       <div>
         <p className="mb-3 text-sm font-bold uppercase tracking-wide text-foreground">Required skills</p>
         <div className="flex flex-wrap gap-2">
-          {job.requiredSkills.map((skill) => (
-            <span
-              key={skill.skillId}
-              className={
-                skill.importance === "MustHave"
-                  ? "rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
-                  : "rounded-full bg-muted px-3 py-1.5 text-xs font-bold text-muted-foreground"
-              }
-            >
-              {skill.skillName ?? "Required skill"}
-            </span>
-          ))}
+          {job.requiredSkills.map((skill, i) => {
+            const isMustHave = skill.importance === "MustHave";
+            const palette = [
+              "bg-primary text-primary-foreground",
+              "bg-chart-2 text-white",
+              "bg-chart-3 text-white",
+              "bg-success text-success-foreground",
+              "bg-info text-info-foreground",
+            ];
+            const colorClass = isMustHave ? palette[i % palette.length] : "bg-muted text-muted-foreground";
+            return (
+              <span
+                key={skill.skillId}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${colorClass}`}
+              >
+                {skill.skillName ?? "Required skill"}
+                <span className="rounded-full bg-black/15 px-1.5 py-0.5 text-[10px] font-semibold">
+                  {skill.minYears > 0 ? `${skill.minYears}+ yrs` : isMustHave ? "Must" : "Nice"}
+                </span>
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>

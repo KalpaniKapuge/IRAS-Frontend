@@ -19,6 +19,14 @@ export const cvApi = {
 
   update: (cvId: number, payload: UpdateCvRequest) => http.put(`/api/cv/${cvId}`, payload).then((r) => r.data),
 
+  uploadPhoto: (cvId: number, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return http
+      .post<CvDetailDto>(`/api/cv/${cvId}/photo`, form, { headers: { "Content-Type": "multipart/form-data" } })
+      .then((r) => r.data);
+  },
+
   updateItems: (cvId: number, payload: UpdateCvSectionItemsRequest) =>
     http.put(`/api/cv/${cvId}/items`, payload).then((r) => r.data),
 

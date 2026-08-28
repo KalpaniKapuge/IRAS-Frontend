@@ -19,12 +19,14 @@ interface CvState {
   isLoadingDetail: boolean;
   isSaving: boolean;
   isDownloading: boolean;
+  isUploadingPhoto: boolean;
 
   loadTemplates: () => Promise<void>;
   loadMine: () => Promise<void>;
   loadDetail: (cvId: number) => Promise<void>;
   create: (payload: CreateCvRequest) => Promise<CvDetailDto | null>;
   update: (cvId: number, payload: UpdateCvRequest) => Promise<void>;
+  uploadPhoto: (cvId: number, file: File) => Promise<boolean>;
   updateItems: (cvId: number, payload: UpdateCvSectionItemsRequest) => Promise<void>;
   remove: (cvId: number) => Promise<boolean>;
   download: (cvId: number, fileName: string) => Promise<void>;
@@ -43,6 +45,7 @@ export const useCvStore = create<CvState>()((set, get) => ({
   isLoadingDetail: false,
   isSaving: false,
   isDownloading: false,
+  isUploadingPhoto: false,
 
   loadTemplates: async () => {
     if (get().templates.length > 0) return;
@@ -101,6 +104,21 @@ export const useCvStore = create<CvState>()((set, get) => ({
       throw err;
     } finally {
       set({ isSaving: false });
+    }
+  },
+
+  uploadPhoto: async (cvId, file) => {
+    set({ isUploadingPhoto: true });
+    try {
+      const currentCv = await cvApi.uploadPhoto(cvId, file);
+      set({ currentCv });
+      toast.success("CV photo updated.");
+      return true;
+    } catch (err) {
+      handle(err, "Failed to upload CV photo.");
+      return false;
+    } finally {
+      set({ isUploadingPhoto: false });
     }
   },
 

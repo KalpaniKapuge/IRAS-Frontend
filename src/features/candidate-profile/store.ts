@@ -6,6 +6,8 @@ import type {
   CandidateProfileDto,
   CertificationFormValues,
   EducationFormValues,
+  LanguageFormValues,
+  ProjectFormValues,
   UpdateCandidateProfileRequest,
   UpsertCandidateSkillRequest,
   WorkExperienceFormValues,
@@ -28,6 +30,12 @@ interface CandidateProfileState {
   addCertification: (candidateId: number, payload: CertificationFormValues) => Promise<void>;
   uploadCertificationFile: (candidateId: number, certificationId: number, file: File) => Promise<void>;
   deleteCertification: (candidateId: number, certificationId: number) => Promise<void>;
+  addLanguage: (candidateId: number, payload: LanguageFormValues) => Promise<void>;
+  updateLanguage: (candidateId: number, languageId: number, payload: LanguageFormValues) => Promise<void>;
+  deleteLanguage: (candidateId: number, languageId: number) => Promise<void>;
+  addProject: (candidateId: number, payload: ProjectFormValues) => Promise<void>;
+  updateProject: (candidateId: number, projectId: number, payload: ProjectFormValues) => Promise<void>;
+  deleteProject: (candidateId: number, projectId: number) => Promise<void>;
   upsertSkill: (candidateId: number, payload: UpsertCandidateSkillRequest) => Promise<void>;
   removeSkill: (candidateId: number, skillId: number) => Promise<void>;
 }
@@ -182,6 +190,68 @@ export const useCandidateProfileStore = create<CandidateProfileState>()((set, ge
       await get().load(candidateId);
     } catch (err) {
       handle(err, "Failed to remove certification.");
+    }
+  },
+
+  addLanguage: async (candidateId, payload) => {
+    try {
+      await candidateProfileApi.addLanguage(candidateId, payload);
+      await get().load(candidateId);
+      toast.success("Language added.");
+    } catch (err) {
+      handle(err, "Failed to add language.");
+      throw err;
+    }
+  },
+
+  updateLanguage: async (candidateId, languageId, payload) => {
+    try {
+      await candidateProfileApi.updateLanguage(candidateId, languageId, payload);
+      await get().load(candidateId);
+      toast.success("Language updated.");
+    } catch (err) {
+      handle(err, "Failed to update language.");
+      throw err;
+    }
+  },
+
+  deleteLanguage: async (candidateId, languageId) => {
+    try {
+      await candidateProfileApi.deleteLanguage(candidateId, languageId);
+      await get().load(candidateId);
+    } catch (err) {
+      handle(err, "Failed to remove language.");
+    }
+  },
+
+  addProject: async (candidateId, payload) => {
+    try {
+      await candidateProfileApi.addProject(candidateId, payload);
+      await get().load(candidateId);
+      toast.success("Project added.");
+    } catch (err) {
+      handle(err, "Failed to add project.");
+      throw err;
+    }
+  },
+
+  updateProject: async (candidateId, projectId, payload) => {
+    try {
+      await candidateProfileApi.updateProject(candidateId, projectId, payload);
+      await get().load(candidateId);
+      toast.success("Project updated.");
+    } catch (err) {
+      handle(err, "Failed to update project.");
+      throw err;
+    }
+  },
+
+  deleteProject: async (candidateId, projectId) => {
+    try {
+      await candidateProfileApi.deleteProject(candidateId, projectId);
+      await get().load(candidateId);
+    } catch (err) {
+      handle(err, "Failed to remove project.");
     }
   },
 

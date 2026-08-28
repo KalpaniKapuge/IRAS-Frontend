@@ -31,6 +31,21 @@ export interface CertificationDto {
   certificateContentType?: string | null;
 }
 
+export interface LanguageDto {
+  languageId: number;
+  languageName: string;
+  proficiency: string;
+}
+
+export interface ProjectDto {
+  projectId: number;
+  title: string;
+  description: string | null;
+  projectUrl: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
 export interface CandidateSkillDto {
   skillId: number;
   skillName: string;
@@ -56,6 +71,8 @@ export interface CandidateProfileDto {
   educations: EducationDto[];
   workExperiences: WorkExperienceDto[];
   certifications: CertificationDto[];
+  languages: LanguageDto[];
+  projects: ProjectDto[];
   skills: CandidateSkillDto[];
 }
 
@@ -80,6 +97,9 @@ export type CertificationFormValues = Omit<
   certificationId?: number;
   certificateFile?: File | null;
 };
+
+export type LanguageFormValues = Omit<LanguageDto, "languageId"> & { languageId?: number };
+export type ProjectFormValues = Omit<ProjectDto, "projectId"> & { projectId?: number };
 
 export interface UpsertCandidateSkillRequest {
   skillId: number;

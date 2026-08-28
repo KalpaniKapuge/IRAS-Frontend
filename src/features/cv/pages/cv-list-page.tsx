@@ -9,8 +9,10 @@ import { ConfirmAction } from "@/components/shared/confirm-action";
 import { CardSkeletonGrid } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { useCvStore } from "../store";
 import { CvFormDialog } from "../components/cv-form-dialog";
+import { CV_TEMPLATE_ACCENT } from "../components/templates";
 
 export function CvListPage() {
   const { cvs, isLoadingList, loadMine, remove } = useCvStore();
@@ -35,14 +37,20 @@ export function CvListPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cvs.map((cv) => (
-            <Card key={cv.cvId} className="transition-shadow hover:shadow-elevated">
+            <Card key={cv.cvId} className="overflow-hidden transition-shadow hover:shadow-elevated">
+              <div className={cn("h-1.5 w-full", CV_TEMPLATE_ACCENT[cv.templateName] ?? "bg-muted")} />
               <CardContent className="flex h-full flex-col gap-3 p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <Link to={`/candidate/cvs/${cv.cvId}`} className="font-semibold hover:underline">
-                      {cv.title}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">Updated {formatDate(cv.updatedAt)}</p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    {cv.photoUrl && (
+                      <img src={cv.photoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                    )}
+                    <div className="min-w-0">
+                      <Link to={`/candidate/cvs/${cv.cvId}`} className="font-semibold hover:underline">
+                        {cv.title}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">Updated {formatDate(cv.updatedAt)}</p>
+                    </div>
                   </div>
                   <Badge variant="secondary" className="shrink-0">{cv.templateName}</Badge>
                 </div>

@@ -8,6 +8,8 @@ import { EducationSection } from "../components/education-section";
 import { ExperienceSection } from "../components/experience-section";
 import { CertificationsSection } from "../components/certifications-section";
 import { SkillsSection } from "../components/skills-section";
+import { LanguagesSection } from "../components/languages-section";
+import { ProjectsSection } from "../components/projects-section";
 
 export function CandidateProfilePage() {
   const candidateId = useAuthStore((s) => s.user!.userId);
@@ -30,6 +32,8 @@ export function CandidateProfilePage() {
         <ExperienceSection candidateId={candidateId} experiences={profile.workExperiences} />
         <CertificationsSection candidateId={candidateId} certifications={profile.certifications} />
         <SkillsSection candidateId={candidateId} skills={profile.skills} />
+        <LanguagesSection candidateId={candidateId} languages={profile.languages} />
+        <ProjectsSection candidateId={candidateId} projects={profile.projects} />
       </div>
     </div>
   );

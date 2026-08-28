@@ -5,6 +5,10 @@ import type {
   CertificationFormValues,
   EducationDto,
   EducationFormValues,
+  LanguageDto,
+  LanguageFormValues,
+  ProjectDto,
+  ProjectFormValues,
   UpdateCandidateProfileRequest,
   UpsertCandidateSkillRequest,
   WorkExperienceDto,
@@ -79,6 +83,24 @@ export const candidateProfileApi = {
 
   deleteCertification: (candidateId: number, certificationId: number) =>
     http.delete(`${base(candidateId)}/certifications/${certificationId}`).then((r) => r.data),
+
+  addLanguage: (candidateId: number, payload: LanguageFormValues) =>
+    http.post<LanguageDto>(`${base(candidateId)}/languages`, payload).then((r) => r.data),
+
+  updateLanguage: (candidateId: number, languageId: number, payload: LanguageFormValues) =>
+    http.put(`${base(candidateId)}/languages/${languageId}`, payload).then((r) => r.data),
+
+  deleteLanguage: (candidateId: number, languageId: number) =>
+    http.delete(`${base(candidateId)}/languages/${languageId}`).then((r) => r.data),
+
+  addProject: (candidateId: number, payload: ProjectFormValues) =>
+    http.post<ProjectDto>(`${base(candidateId)}/projects`, payload).then((r) => r.data),
+
+  updateProject: (candidateId: number, projectId: number, payload: ProjectFormValues) =>
+    http.put(`${base(candidateId)}/projects/${projectId}`, payload).then((r) => r.data),
+
+  deleteProject: (candidateId: number, projectId: number) =>
+    http.delete(`${base(candidateId)}/projects/${projectId}`).then((r) => r.data),
 
   upsertSkill: (candidateId: number, payload: UpsertCandidateSkillRequest) =>
     http.put(`${base(candidateId)}/skills`, payload).then((r) => r.data),

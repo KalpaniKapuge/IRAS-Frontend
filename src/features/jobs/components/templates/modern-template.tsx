@@ -63,13 +63,23 @@ export function ModernTemplate({ job, actionSlot }: JobTemplateProps) {
                 return (
                   <div
                     key={skill.skillId}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2"
+                    className={
+                      isMustHave
+                        ? "flex items-center justify-between gap-3 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2"
+                        : "flex items-center justify-between gap-3 rounded-lg border border-chart-2/25 bg-chart-2/5 px-3 py-2"
+                    }
                   >
                     <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
                       <CheckCircle2 className={isMustHave ? "h-4 w-4 shrink-0 text-primary" : "h-4 w-4 shrink-0 text-chart-2"} />
                       <span className="truncate">{skill.skillName ?? "Required skill"}</span>
                     </span>
-                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                    <span
+                      className={
+                        isMustHave
+                          ? "shrink-0 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground"
+                          : "shrink-0 rounded-full bg-chart-2 px-2 py-0.5 text-[11px] font-semibold text-white"
+                      }
+                    >
                       {skill.minYears > 0 ? `${skill.minYears}+ yrs` : isMustHave ? "Must-have" : "Nice-to-have"}
                     </span>
                   </div>
