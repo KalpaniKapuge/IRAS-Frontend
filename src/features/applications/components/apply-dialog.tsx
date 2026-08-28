@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileText, Send } from "lucide-react";
+import { FileText, LayoutTemplate, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +17,8 @@ import { ResumeUploadDropzone } from "@/features/resumes/components/resume-uploa
 import { SkillConfirmationDialog } from "@/features/resumes/components/skill-confirmation-dialog";
 import { resumesApi } from "@/features/resumes/api";
 import type { ParseResultDto, ResumeDto } from "@/features/resumes/types";
+import { cvApi } from "@/features/cv/api";
+import type { CvSummaryDto } from "@/features/cv/types";
 import { useApplicationsStore } from "../store";
 
 function isUsableResume(resume: ResumeDto) {
@@ -31,6 +33,8 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
 
   const [open, setOpen] = useState(false);
   const [resumes, setResumes] = useState<ResumeDto[] | null>(null);
+  const [cvs, setCvs] = useState<CvSummaryDto[] | null>(null);
+  const [convertingCvId, setConvertingCvId] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
@@ -54,6 +58,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
   useEffect(() => {
     if (!open) return;
     loadResumes();
+    cvApi.getMine().then(setCvs);
   }, [loadResumes, open]);
 
   const usableResumes = resumes?.filter(isUsableResume) ?? [];
@@ -66,6 +71,40 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
       setSelectedId(result.resumeId);
     }
   };
+
+  const handleUseCv = async (cvId: number) => {
+    setConvertingCvId(cvId);
+    try {
+      const result = await resumesApi.createFromCv(cvId);
+      await handleUploaded(result);
+    } finally {
+      setConvertingCvId(null);
+    }
+  };
+
+  const cvPicker = cvs && cvs.length > 0 && (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-muted-foreground">Or use a CV from your profile</p>
+      {cvs.map((cv) => (
+        <div key={cv.cvId} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+          <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+            <LayoutTemplate className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{cv.title}</span>
+          </span>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="shrink-0"
+            loading={convertingCvId === cv.cvId}
+            onClick={() => handleUseCv(cv.cvId)}
+          >
+            Use this CV
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
 
   const handleApply = async () => {
     if (!selectedId) return;
@@ -118,6 +157,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
               }
               className="border-none py-4"
             />
+            {cvPicker}
             <ResumeUploadDropzone className="py-6" existingCount={resumes.length} onUploaded={handleUploaded} />
           </div>
         ) : (
@@ -132,9 +172,11 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
                     selectedId === resume.resumeId ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40",
                   )}
                 >
-                  <span className="flex items-center gap-2 text-sm font-medium">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    {resume.fileFormat} Resume {resume.isPrimary && "(Primary)"}
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">
+                      {resume.sourceCvTitle ?? `${resume.fileFormat} Resume`} {resume.isPrimary && "(Primary)"}
+                    </span>
                   </span>
                   <span
                     className={cn(
@@ -145,6 +187,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
                 </button>
               ))}
             </div>
+            {cvPicker}
             <ResumeUploadDropzone className="py-5" existingCount={resumes.length} onUploaded={handleUploaded} />
           </div>
         )}

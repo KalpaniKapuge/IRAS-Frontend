@@ -12,6 +12,8 @@ export const resumesApi = {
       .then((r) => r.data);
   },
 
+  createFromCv: (cvId: number) => http.post<ParseResultDto>(`/api/resumes/from-cv/${cvId}`).then((r) => r.data),
+
   retryParse: (resumeId: number) => http.post<ParseResultDto>(`/api/resumes/${resumeId}/retry-parse`).then((r) => r.data),
 
   confirmSkills: (resumeId: number, skillIds: number[]) =>

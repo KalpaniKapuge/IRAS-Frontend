@@ -7,6 +7,9 @@ export interface ResumeDto {
   parseStatus: ParseStatus;
   parseError: string | null;
   uploadedAt: string;
+  // Set only when this resume was generated from a CV-builder CV rather than uploaded —
+  // the CV's own title, for display (e.g. "My Software Engineer CV" instead of "PDF Resume").
+  sourceCvTitle: string | null;
 }
 
 export interface SuggestedSkillDto {
