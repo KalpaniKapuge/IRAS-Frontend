@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, FolderGit2, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, FileCheck2, FolderGit2, Sparkles, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmAction } from "@/components/shared/confirm-action";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { ApiError } from "@/types/common";
 import { titleCase } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
@@ -16,6 +18,7 @@ import { skillResourcesApi } from "@/features/skill-resources/api";
 import { ResourceLinksList } from "@/features/skill-resources/components/resource-links-list";
 import type { SkillResourceDto } from "@/features/skill-resources/types";
 import { skillImprovementPlansApi } from "../api";
+import { AddEvidenceDialog } from "../components/add-evidence-dialog";
 import type { SkillImprovementPlanDto } from "../types";
 
 export function PlanDetailPage() {
@@ -43,6 +46,18 @@ export function PlanDetailPage() {
       setPlan(updated);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to update step.");
+    }
+  };
+
+  const reloadPlan = () => skillImprovementPlansApi.getById(candidateId, Number(planId)).then(setPlan);
+
+  const handleRemoveEvidence = async (evidenceId: number) => {
+    if (!plan) return;
+    try {
+      await skillImprovementPlansApi.removeEvidence(candidateId, plan.planId, evidenceId);
+      reloadPlan();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to remove evidence.");
     }
   };
 
@@ -185,6 +200,58 @@ export function PlanDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="flex items-center gap-1.5 text-base">
+                <FileCheck2 className="h-4 w-4" /> Evidence
+              </CardTitle>
+              <AddEvidenceDialog candidateId={candidateId} planId={plan.planId} onAdded={reloadPlan} />
+            </CardHeader>
+            <CardContent className="space-y-3 pt-0">
+              {plan.evidence.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No evidence submitted yet. Once your roadmap is complete, add proof (a GitHub link,
+                  screenshot, or file) for an admin to verify.
+                </p>
+              ) : (
+                plan.evidence.map((item) => (
+                  <div key={item.evidenceId} className="space-y-1.5 rounded-lg border border-border p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
+                        <StatusBadge enumName="EvidenceVerificationStatus" value={item.verificationStatus} />
+                      </div>
+                      <ConfirmAction
+                        trigger={
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        }
+                        title="Remove this evidence?"
+                        variant="destructive"
+                        confirmLabel="Remove"
+                        onConfirm={() => handleRemoveEvidence(item.evidenceId)}
+                      />
+                    </div>
+                    <a
+                      href={item.evidenceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{item.evidenceUrl}</span>
+                    </a>
+                    {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
+                    {item.verificationStatus === "Rejected" && item.verifierNotes && (
+                      <p className="text-xs text-destructive">Reviewer note: {item.verifierNotes}</p>
+                    )}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

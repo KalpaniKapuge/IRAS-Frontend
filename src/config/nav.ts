@@ -5,6 +5,7 @@ import {
   Briefcase,
   Building2,
   CalendarClock,
+  FileCheck2,
   FileStack,
   FileText,
   Gauge,
@@ -89,6 +90,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
     {
       title: "Operations",
       items: [
+        { label: "Skill Plan Evidence", to: "/admin/skill-plan-evidence", icon: FileCheck2 },
         { label: "System Status", to: "/admin/system", icon: Gauge },
         { label: "Audit Logs", to: "/admin/audit-logs", icon: ScrollText },
       ],

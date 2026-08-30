@@ -73,6 +73,12 @@ const KnowledgeBasePage = () =>
   lazyPage(() => import("@/features/knowledge-base/pages/knowledge-base-page").then((m) => ({ default: m.KnowledgeBasePage })));
 const SkillResourcesPage = () =>
   lazyPage(() => import("@/features/skill-resources/pages/skill-resources-page").then((m) => ({ default: m.SkillResourcesPage })));
+const SkillPlanEvidenceReviewPage = () =>
+  lazyPage(() =>
+    import("@/features/admin-skill-plan-review/pages/skill-plan-evidence-review-page").then((m) => ({
+      default: m.SkillPlanEvidenceReviewPage,
+    })),
+  );
 const SystemStatusPage = () =>
   lazyPage(() => import("@/features/system-status/pages/system-status-page").then((m) => ({ default: m.SystemStatusPage })));
 const AuditLogsPage = () =>
@@ -152,6 +158,7 @@ const router = createBrowserRouter([
           { path: "skills", element: <SkillsAdminPage /> },
           { path: "knowledge-base", element: <KnowledgeBasePage /> },
           { path: "skill-resources", element: <SkillResourcesPage /> },
+          { path: "skill-plan-evidence", element: <SkillPlanEvidenceReviewPage /> },
           { path: "system", element: <SystemStatusPage /> },
           { path: "audit-logs", element: <AuditLogsPage /> },
         ],

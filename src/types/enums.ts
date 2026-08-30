@@ -103,6 +103,15 @@ export type SkillTargetLevel = (typeof SKILL_TARGET_LEVELS)[number];
 export const SKILL_PLAN_STATUSES = ["NotStarted", "Learning", "Practicing", "Completed", "Verified"] as const;
 export type SkillPlanStatus = (typeof SKILL_PLAN_STATUSES)[number];
 
+export const SKILL_EVIDENCE_TYPES = ["GitHub", "File", "Screenshot", "Certificate", "Other"] as const;
+export type SkillEvidenceType = (typeof SKILL_EVIDENCE_TYPES)[number];
+
+// GitHub/Other are just a URL; the rest require an actual file upload.
+export const LINK_EVIDENCE_TYPES = ["GitHub", "Other"] as const satisfies readonly SkillEvidenceType[];
+
+export const EVIDENCE_VERIFICATION_STATUSES = ["Pending", "Approved", "Rejected"] as const;
+export type EvidenceVerificationStatus = (typeof EVIDENCE_VERIFICATION_STATUSES)[number];
+
 export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
 export type InterviewMode = (typeof INTERVIEW_MODES)[number];
 
@@ -181,6 +190,12 @@ const skillPlanStatusTone: Record<SkillPlanStatus, BadgeTone> = {
   Verified: "primary",
 };
 
+const evidenceVerificationStatusTone: Record<EvidenceVerificationStatus, BadgeTone> = {
+  Pending: "warning",
+  Approved: "success",
+  Rejected: "destructive",
+};
+
 export const ENUM_TONE_MAPS = {
   ApplicationStatus: applicationStatusTone,
   JobStatus: jobStatusTone,
@@ -192,4 +207,5 @@ export const ENUM_TONE_MAPS = {
   TargetSkillStatus: targetSkillStatusTone,
   SkillPlanPriority: skillPlanPriorityTone,
   SkillPlanStatus: skillPlanStatusTone,
+  EvidenceVerificationStatus: evidenceVerificationStatusTone,
 } as const;

@@ -1,4 +1,10 @@
-import type { SkillPlanPriority, SkillPlanStatus, SkillTargetLevel } from "@/types/enums";
+import type {
+  EvidenceVerificationStatus,
+  SkillEvidenceType,
+  SkillPlanPriority,
+  SkillPlanStatus,
+  SkillTargetLevel,
+} from "@/types/enums";
 
 export interface SkillPlanStepDto {
   stepId: number;
@@ -9,6 +15,24 @@ export interface SkillPlanStepDto {
   output: string;
   isCompleted: boolean;
   completedAt: string | null;
+}
+
+export interface SkillPlanEvidenceDto {
+  evidenceId: number;
+  planId: number;
+  evidenceType: SkillEvidenceType;
+  evidenceUrl: string;
+  notes: string | null;
+  uploadedAt: string;
+  verificationStatus: EvidenceVerificationStatus;
+  verifiedAt: string | null;
+  verifierNotes: string | null;
+}
+
+export interface AddEvidenceLinkRequest {
+  evidenceType: SkillEvidenceType;
+  evidenceUrl: string;
+  notes?: string;
 }
 
 export interface SkillImprovementPlanDto {
@@ -35,4 +59,20 @@ export interface SkillImprovementPlanDto {
 
   progressPercent: number;
   steps: SkillPlanStepDto[];
+  evidence: SkillPlanEvidenceDto[];
+}
+
+// Admin review-queue row — see AdminEvidenceReviewDto on the backend.
+export interface AdminEvidenceReviewDto {
+  evidenceId: number;
+  planId: number;
+  candidateId: number;
+  candidateName: string;
+  skillId: number;
+  skillName: string;
+  evidenceType: SkillEvidenceType;
+  evidenceUrl: string;
+  notes: string | null;
+  uploadedAt: string;
+  verificationStatus: EvidenceVerificationStatus;
 }
