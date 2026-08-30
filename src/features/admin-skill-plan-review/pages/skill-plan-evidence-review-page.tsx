@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, ExternalLink, FileCheck2, XCircle } from "lucide-react";
+import { CheckCircle2, ExternalLink, FileCheck2, Sparkles, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +96,7 @@ export function SkillPlanEvidenceReviewPage() {
     <div className="space-y-6">
       <PageHeader
         title="Skill Plan Evidence"
-        description="Candidate-submitted proof for completed skill improvement plans, awaiting review."
+        description="Evidence the automatic AI reviewer wasn't confident enough to auto-approve or auto-reject on its own — everything else is triaged automatically."
       />
 
       {items === null ? (
@@ -131,6 +131,15 @@ export function SkillPlanEvidenceReviewPage() {
                   <span className="truncate">{item.evidenceUrl}</span>
                 </a>
                 {item.notes && <p className="text-sm text-foreground/80">{item.notes}</p>}
+                {item.aiConfidenceScore !== null && (
+                  <div className="flex items-start gap-1.5 rounded-md bg-muted/40 p-2">
+                    <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">AI confidence: {item.aiConfidenceScore}/100</span>
+                      {item.aiRationale && <> — {item.aiRationale}</>}
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">Submitted {formatDate(item.uploadedAt)}</p>
               </CardContent>
             </Card>

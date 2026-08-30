@@ -27,6 +27,11 @@ export interface SkillPlanEvidenceDto {
   verificationStatus: EvidenceVerificationStatus;
   verifiedAt: string | null;
   verifierNotes: string | null;
+
+  // Null for file-backed evidence — automatic review only runs on link-type submissions.
+  aiConfidenceScore: number | null;
+  aiRationale: string | null;
+  autoReviewed: boolean;
 }
 
 export interface AddEvidenceLinkRequest {
@@ -75,4 +80,6 @@ export interface AdminEvidenceReviewDto {
   notes: string | null;
   uploadedAt: string;
   verificationStatus: EvidenceVerificationStatus;
+  aiConfidenceScore: number | null;
+  aiRationale: string | null;
 }

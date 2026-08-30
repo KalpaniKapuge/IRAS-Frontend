@@ -244,7 +244,21 @@ export function PlanDetailPage() {
                       <span className="truncate">{item.evidenceUrl}</span>
                     </a>
                     {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
-                    {item.verificationStatus === "Rejected" && item.verifierNotes && (
+                    {item.aiConfidenceScore !== null && (
+                      <div className="flex items-start gap-1.5 rounded-md bg-muted/40 p-2">
+                        <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground">
+                            AI confidence: {item.aiConfidenceScore}/100
+                            {item.autoReviewed
+                              ? ` — auto-${item.verificationStatus.toLowerCase()}`
+                              : " — awaiting admin review"}
+                          </span>
+                          {item.aiRationale && <> — {item.aiRationale}</>}
+                        </p>
+                      </div>
+                    )}
+                    {item.verificationStatus === "Rejected" && item.verifierNotes && !item.autoReviewed && (
                       <p className="text-xs text-destructive">Reviewer note: {item.verifierNotes}</p>
                     )}
                   </div>
