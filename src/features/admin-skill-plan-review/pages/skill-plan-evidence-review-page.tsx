@@ -175,6 +175,13 @@ export function SkillPlanEvidenceReviewPage() {
                   <ListChecks className="h-3.5 w-3.5 shrink-0" />
                   Roadmap checklist: {item.stepsCompleted}/{item.totalSteps} steps complete
                 </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-2.5">
+                  <p className="text-xs font-medium text-foreground">Improvement plan: {item.projectTitle}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{item.planOverview}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground/80">Expected to prove:</span> {item.projectExpectedOutput}
+                  </p>
+                </div>
                 <a
                   href={item.evidenceUrl}
                   target="_blank"

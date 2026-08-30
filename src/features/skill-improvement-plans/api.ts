@@ -34,4 +34,14 @@ export const skillImprovementPlansApi = {
 
   removeEvidence: (candidateId: number, planId: number, evidenceId: number) =>
     http.delete(`${base(candidateId)}/${planId}/evidence/${evidenceId}`).then((r) => r.data),
+
+  submitEvidence: (candidateId: number, planId: number, evidenceId: number) =>
+    http
+      .put<SkillPlanEvidenceDto>(`${base(candidateId)}/${planId}/evidence/${evidenceId}/submit`, {})
+      .then((r) => r.data),
+
+  updateProgress: (candidateId: number, planId: number, status: string) =>
+    http
+      .put<SkillImprovementPlanDto>(`${base(candidateId)}/${planId}/progress`, { status })
+      .then((r) => r.data),
 };

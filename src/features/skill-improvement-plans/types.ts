@@ -76,6 +76,10 @@ export interface AdminEvidenceReviewDto {
   skillId: number;
   skillName: string;
   jobTitle: string | null;
+  planOverview: string;
+  projectTitle: string;
+  projectTask: string;
+  projectExpectedOutput: string;
   evidenceType: SkillEvidenceType;
   evidenceUrl: string;
   notes: string | null;

@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, ExternalLink, FileCheck2, FolderGit2, Sparkles, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, FileCheck2, FolderGit2, Send, Sparkles, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ApiError } from "@/types/common";
 import { titleCase } from "@/lib/utils";
+import { CANDIDATE_SETTABLE_PLAN_STATUSES } from "@/types/enums";
 import { useAuthStore } from "@/features/auth/store";
 import { skillResourcesApi } from "@/features/skill-resources/api";
 import { ResourceLinksList } from "@/features/skill-resources/components/resource-links-list";
@@ -61,6 +64,27 @@ export function PlanDetailPage() {
     }
   };
 
+  const handleSubmitEvidence = async (evidenceId: number) => {
+    if (!plan) return;
+    try {
+      await skillImprovementPlansApi.submitEvidence(candidateId, plan.planId, evidenceId);
+      toast.success("Submitted for review.");
+      reloadPlan();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to submit evidence for review.");
+    }
+  };
+
+  const handleUpdateProgress = async (status: string) => {
+    if (!plan) return;
+    try {
+      const updated = await skillImprovementPlansApi.updateProgress(candidateId, plan.planId, status);
+      setPlan(updated);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to update progress.");
+    }
+  };
+
   if (notFound) {
     return (
       <EmptyState
@@ -87,19 +111,7 @@ export function PlanDetailPage() {
           <Badge variant={plan.priority === "High" ? "destructive" : plan.priority === "Medium" ? "warning" : "muted"}>
             {plan.priority} priority
           </Badge>
-          <Badge
-            variant={
-              plan.status === "Completed" || plan.status === "Verified"
-                ? "success"
-                : plan.status === "Practicing"
-                  ? "warning"
-                  : plan.status === "Learning"
-                    ? "info"
-                    : "muted"
-            }
-          >
-            {titleCase(plan.status)}
-          </Badge>
+          <StatusBadge enumName="SkillPlanStatus" value={plan.status} />
         </div>
         <p className="text-sm text-muted-foreground">
           {plan.jobTitle ? `For ${plan.jobTitle}` : "General skill development"} · Target level: {titleCase(plan.targetLevel)}
@@ -113,6 +125,19 @@ export function PlanDetailPage() {
             </span>
           )}
         </p>
+        {plan.status !== "Verified" && (
+          <div className="flex items-center gap-2 pt-1">
+            <Label className="text-xs text-muted-foreground">Your progress</Label>
+            <Select value={plan.status} onValueChange={handleUpdateProgress}>
+              <SelectTrigger className="h-8 w-48"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {CANDIDATE_SETTABLE_PLAN_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>{titleCase(s)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <Card>
@@ -211,8 +236,8 @@ export function PlanDetailPage() {
             <CardContent className="space-y-3 pt-0">
               {plan.evidence.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No evidence submitted yet. Once your roadmap is complete, add proof (a GitHub link,
-                  screenshot, or file) for an admin to verify.
+                  No evidence added yet. Add proof (a GitHub link, screenshot, or file), then click
+                  "Submit for Review" when you're ready for an admin to verify it.
                 </p>
               ) : (
                 plan.evidence.map((item) => (
@@ -222,17 +247,24 @@ export function PlanDetailPage() {
                         <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
                         <StatusBadge enumName="EvidenceVerificationStatus" value={item.verificationStatus} />
                       </div>
-                      <ConfirmAction
-                        trigger={
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
-                            <Trash2 className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-1.5">
+                        {item.verificationStatus === "Draft" && (
+                          <Button size="sm" className="h-7" onClick={() => handleSubmitEvidence(item.evidenceId)}>
+                            <Send className="h-3.5 w-3.5" /> Submit for Review
                           </Button>
-                        }
-                        title="Remove this evidence?"
-                        variant="destructive"
-                        confirmLabel="Remove"
-                        onConfirm={() => handleRemoveEvidence(item.evidenceId)}
-                      />
+                        )}
+                        <ConfirmAction
+                          trigger={
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          }
+                          title="Remove this evidence?"
+                          variant="destructive"
+                          confirmLabel="Remove"
+                          onConfirm={() => handleRemoveEvidence(item.evidenceId)}
+                        />
+                      </div>
                     </div>
                     <a
                       href={item.evidenceUrl}

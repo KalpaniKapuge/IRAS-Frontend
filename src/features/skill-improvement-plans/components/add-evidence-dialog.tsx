@@ -57,12 +57,12 @@ export function AddEvidenceDialog({
         if (!file) return;
         await skillImprovementPlansApi.addEvidenceFile(candidateId, planId, evidenceType, notes.trim() || undefined, file);
       }
-      toast.success("Evidence submitted for review.");
+      toast.success("Evidence added. Click \"Submit for Review\" on it when you're ready for an admin to see it.");
       setOpen(false);
       reset();
       onAdded();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Failed to submit evidence.");
+      toast.error(err instanceof ApiError ? err.message : "Failed to add evidence.");
     } finally {
       setIsSaving(false);
     }
@@ -77,7 +77,7 @@ export function AddEvidenceDialog({
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Submit evidence</DialogTitle>
+          <DialogTitle>Add evidence</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -116,7 +116,7 @@ export function AddEvidenceDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
           <Button onClick={handleSubmit} loading={isSaving} disabled={!canSubmit}>
-            Submit
+            Add Evidence
           </Button>
         </DialogFooter>
       </DialogContent>

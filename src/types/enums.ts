@@ -100,7 +100,11 @@ export type SkillPlanPriority = (typeof SKILL_PLAN_PRIORITIES)[number];
 export const SKILL_TARGET_LEVELS = ["Beginner", "Intermediate", "JobReady"] as const;
 export type SkillTargetLevel = (typeof SKILL_TARGET_LEVELS)[number];
 
-export const SKILL_PLAN_STATUSES = ["NotStarted", "Learning", "Practicing", "Completed", "Verified"] as const;
+export const SKILL_PLAN_STATUSES = ["NotStarted", "Learning", "Practicing", "PartiallyCompleted", "Completed", "Verified"] as const;
+
+// The subset of SKILL_PLAN_STATUSES the candidate can set directly via "Update progress" —
+// Verified is excluded because it's only ever set by the system once evidence is approved.
+export const CANDIDATE_SETTABLE_PLAN_STATUSES = ["NotStarted", "Learning", "Practicing", "PartiallyCompleted", "Completed"] as const;
 export type SkillPlanStatus = (typeof SKILL_PLAN_STATUSES)[number];
 
 export const SKILL_EVIDENCE_TYPES = ["GitHub", "File", "Screenshot", "Certificate", "Other"] as const;
@@ -109,7 +113,7 @@ export type SkillEvidenceType = (typeof SKILL_EVIDENCE_TYPES)[number];
 // GitHub/Other are just a URL; the rest require an actual file upload.
 export const LINK_EVIDENCE_TYPES = ["GitHub", "Other"] as const satisfies readonly SkillEvidenceType[];
 
-export const EVIDENCE_VERIFICATION_STATUSES = ["Pending", "Approved", "Rejected", "RevisionRequired"] as const;
+export const EVIDENCE_VERIFICATION_STATUSES = ["Draft", "Pending", "Approved", "Rejected", "RevisionRequired"] as const;
 export type EvidenceVerificationStatus = (typeof EVIDENCE_VERIFICATION_STATUSES)[number];
 
 export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
@@ -186,11 +190,13 @@ const skillPlanStatusTone: Record<SkillPlanStatus, BadgeTone> = {
   NotStarted: "muted",
   Learning: "info",
   Practicing: "warning",
+  PartiallyCompleted: "warning",
   Completed: "success",
   Verified: "primary",
 };
 
 const evidenceVerificationStatusTone: Record<EvidenceVerificationStatus, BadgeTone> = {
+  Draft: "muted",
   Pending: "warning",
   Approved: "success",
   Rejected: "destructive",
