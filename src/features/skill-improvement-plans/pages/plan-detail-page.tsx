@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -15,13 +14,13 @@ import { ConfirmAction } from "@/components/shared/confirm-action";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ApiError } from "@/types/common";
 import { titleCase } from "@/lib/utils";
-import { CANDIDATE_SETTABLE_PLAN_STATUSES } from "@/types/enums";
 import { useAuthStore } from "@/features/auth/store";
 import { skillResourcesApi } from "@/features/skill-resources/api";
 import { ResourceLinksList } from "@/features/skill-resources/components/resource-links-list";
 import type { SkillResourceDto } from "@/features/skill-resources/types";
 import { skillImprovementPlansApi } from "../api";
 import { AddEvidenceDialog } from "../components/add-evidence-dialog";
+import { ProgressStepper } from "../components/progress-stepper";
 import type { SkillImprovementPlanDto } from "../types";
 
 export function PlanDetailPage() {
@@ -125,28 +124,31 @@ export function PlanDetailPage() {
             </span>
           )}
         </p>
-        {plan.status !== "Verified" && (
-          <div className="flex items-center gap-2 pt-1">
-            <Label className="text-xs text-muted-foreground">Your progress</Label>
-            <Select value={plan.status} onValueChange={handleUpdateProgress}>
-              <SelectTrigger className="h-8 w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CANDIDATE_SETTABLE_PLAN_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{titleCase(s)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
 
       <Card>
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Roadmap progress</p>
+            <p className="text-sm font-medium">Roadmap checklist</p>
             <p className="text-sm text-muted-foreground">{plan.progressPercent}%</p>
           </div>
           <Progress value={plan.progressPercent} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-2 p-5">
+          <Label className="text-sm font-medium text-foreground">Your progress</Label>
+          {plan.status === "Verified" ? (
+            <p className="text-sm text-muted-foreground">
+              This skill has been verified — progress can no longer be changed.
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">Click a stage to update where you are.</p>
+              <ProgressStepper status={plan.status} onSelect={handleUpdateProgress} />
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -241,30 +243,30 @@ export function PlanDetailPage() {
                 </p>
               ) : (
                 plan.evidence.map((item) => (
-                  <div key={item.evidenceId} className="space-y-1.5 rounded-lg border border-border p-3">
+                  <div
+                    key={item.evidenceId}
+                    className={
+                      item.verificationStatus === "Draft"
+                        ? "space-y-2 rounded-lg border-2 border-primary/40 bg-primary/5 p-3"
+                        : "space-y-1.5 rounded-lg border border-border p-3"
+                    }
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
                         <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
                         <StatusBadge enumName="EvidenceVerificationStatus" value={item.verificationStatus} />
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        {item.verificationStatus === "Draft" && (
-                          <Button size="sm" className="h-7" onClick={() => handleSubmitEvidence(item.evidenceId)}>
-                            <Send className="h-3.5 w-3.5" /> Submit for Review
+                      <ConfirmAction
+                        trigger={
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
-                        )}
-                        <ConfirmAction
-                          trigger={
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          }
-                          title="Remove this evidence?"
-                          variant="destructive"
-                          confirmLabel="Remove"
-                          onConfirm={() => handleRemoveEvidence(item.evidenceId)}
-                        />
-                      </div>
+                        }
+                        title="Remove this evidence?"
+                        variant="destructive"
+                        confirmLabel="Remove"
+                        onConfirm={() => handleRemoveEvidence(item.evidenceId)}
+                      />
                     </div>
                     <a
                       href={item.evidenceUrl}
@@ -276,6 +278,14 @@ export function PlanDetailPage() {
                       <span className="truncate">{item.evidenceUrl}</span>
                     </a>
                     {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
+                    {item.verificationStatus === "Draft" && (
+                      <div className="flex items-center justify-between gap-2 rounded-md bg-primary/10 p-2">
+                        <p className="text-xs text-foreground/80">Not submitted yet — only you can see this.</p>
+                        <Button size="sm" className="h-7 shrink-0" onClick={() => handleSubmitEvidence(item.evidenceId)}>
+                          <Send className="h-3.5 w-3.5" /> Submit for Review
+                        </Button>
+                      </div>
+                    )}
                     {item.aiConfidenceScore !== null && (
                       <div className="flex items-start gap-1.5 rounded-md bg-muted/40 p-2">
                         <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
