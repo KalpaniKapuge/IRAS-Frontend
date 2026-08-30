@@ -75,6 +75,7 @@ export interface AdminEvidenceReviewDto {
   candidateName: string;
   skillId: number;
   skillName: string;
+  jobTitle: string | null;
   evidenceType: SkillEvidenceType;
   evidenceUrl: string;
   notes: string | null;
@@ -82,4 +83,6 @@ export interface AdminEvidenceReviewDto {
   verificationStatus: EvidenceVerificationStatus;
   aiConfidenceScore: number | null;
   aiRationale: string | null;
+  stepsCompleted: number;
+  totalSteps: number;
 }

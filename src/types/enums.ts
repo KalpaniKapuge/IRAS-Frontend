@@ -11,7 +11,7 @@ export type EducationLevel = (typeof EDUCATION_LEVELS)[number];
 export const PROFICIENCY_LEVELS = ["Beginner", "Intermediate", "Advanced", "Expert"] as const;
 export type ProficiencyLevel = (typeof PROFICIENCY_LEVELS)[number];
 
-export const SKILL_SOURCES = ["ManuallyAdded", "ResumeParsed"] as const;
+export const SKILL_SOURCES = ["ManuallyAdded", "ResumeParsed", "VerifiedImprovement"] as const;
 export type SkillSource = (typeof SKILL_SOURCES)[number];
 
 export const SKILL_CATEGORIES = [
@@ -109,7 +109,7 @@ export type SkillEvidenceType = (typeof SKILL_EVIDENCE_TYPES)[number];
 // GitHub/Other are just a URL; the rest require an actual file upload.
 export const LINK_EVIDENCE_TYPES = ["GitHub", "Other"] as const satisfies readonly SkillEvidenceType[];
 
-export const EVIDENCE_VERIFICATION_STATUSES = ["Pending", "Approved", "Rejected"] as const;
+export const EVIDENCE_VERIFICATION_STATUSES = ["Pending", "Approved", "Rejected", "RevisionRequired"] as const;
 export type EvidenceVerificationStatus = (typeof EVIDENCE_VERIFICATION_STATUSES)[number];
 
 export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
@@ -194,6 +194,7 @@ const evidenceVerificationStatusTone: Record<EvidenceVerificationStatus, BadgeTo
   Pending: "warning",
   Approved: "success",
   Rejected: "destructive",
+  RevisionRequired: "info",
 };
 
 export const ENUM_TONE_MAPS = {

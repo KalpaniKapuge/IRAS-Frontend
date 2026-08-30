@@ -261,6 +261,18 @@ export function PlanDetailPage() {
                     {item.verificationStatus === "Rejected" && item.verifierNotes && !item.autoReviewed && (
                       <p className="text-xs text-destructive">Reviewer note: {item.verifierNotes}</p>
                     )}
+                    {item.verificationStatus === "RevisionRequired" && (
+                      <div className="rounded-md border border-info/30 bg-info/10 p-2">
+                        {item.verifierNotes && (
+                          <p className="text-xs text-foreground/90">
+                            <span className="font-medium">Reviewer note:</span> {item.verifierNotes}
+                          </p>
+                        )}
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Address the feedback above and submit new evidence — this submission won't be reconsidered on its own.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))
               )}

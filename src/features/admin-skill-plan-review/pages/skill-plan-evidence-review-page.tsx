@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, ExternalLink, FileCheck2, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle2, ExternalLink, FileCheck2, ListChecks, RotateCcw, Sparkles, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,25 @@ import { ApiError } from "@/types/common";
 import type { AdminEvidenceReviewDto } from "@/features/skill-improvement-plans/types";
 import { adminSkillPlanReviewApi } from "../api";
 
-function RejectDialog({ onReject }: { onReject: (notes: string) => Promise<void> }) {
+// Reject and Request Revision share the same shape — a short comment the candidate will
+// see — so one dialog handles both instead of duplicating the form.
+function DecisionDialog({
+  trigger,
+  title,
+  notesLabel,
+  notesPlaceholder,
+  confirmLabel,
+  confirmVariant,
+  onConfirm,
+}: {
+  trigger: React.ReactNode;
+  title: string;
+  notesLabel: string;
+  notesPlaceholder: string;
+  confirmLabel: string;
+  confirmVariant: "destructive" | "outline";
+  onConfirm: (notes: string) => Promise<void>;
+}) {
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -31,7 +49,7 @@ function RejectDialog({ onReject }: { onReject: (notes: string) => Promise<void>
   const handleSubmit = async () => {
     setIsSaving(true);
     try {
-      await onReject(notes.trim());
+      await onConfirm(notes.trim());
       setOpen(false);
       setNotes("");
     } finally {
@@ -41,22 +59,18 @@ function RejectDialog({ onReject }: { onReject: (notes: string) => Promise<void>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-          <XCircle className="h-3.5 w-3.5" /> Reject
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Reject this evidence?</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          <Label>Reason (shown to the candidate)</Label>
-          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Screenshot is unreadable, please retake." />
+          <Label>{notesLabel}</Label>
+          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={notesPlaceholder} />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="destructive" onClick={handleSubmit} loading={isSaving}>Reject</Button>
+          <Button variant={confirmVariant} onClick={handleSubmit} loading={isSaving}>{confirmLabel}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -74,7 +88,7 @@ export function SkillPlanEvidenceReviewPage() {
 
   const handleApprove = async (evidenceId: number) => {
     try {
-      await adminSkillPlanReviewApi.verify(evidenceId, true);
+      await adminSkillPlanReviewApi.verify(evidenceId, "Approve");
       toast.success("Evidence approved.");
       load();
     } catch (err) {
@@ -84,11 +98,21 @@ export function SkillPlanEvidenceReviewPage() {
 
   const handleReject = async (evidenceId: number, notes: string) => {
     try {
-      await adminSkillPlanReviewApi.verify(evidenceId, false, notes);
+      await adminSkillPlanReviewApi.verify(evidenceId, "Reject", notes);
       toast.success("Evidence rejected.");
       load();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to reject evidence.");
+    }
+  };
+
+  const handleRequestRevision = async (evidenceId: number, notes: string) => {
+    try {
+      await adminSkillPlanReviewApi.verify(evidenceId, "RequestRevision", notes);
+      toast.success("Revision requested.");
+      load();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to request revision.");
     }
   };
 
@@ -109,17 +133,47 @@ export function SkillPlanEvidenceReviewPage() {
             <Card key={item.evidenceId}>
               <CardContent className="space-y-2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="font-medium">{item.candidateName}</p>
                     <span className="text-sm text-muted-foreground">— {item.skillName}</span>
+                    {item.jobTitle && <span className="text-sm text-muted-foreground">({item.jobTitle})</span>}
                     <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button size="sm" onClick={() => handleApprove(item.evidenceId)}>
                       <CheckCircle2 className="h-3.5 w-3.5" /> Approve
                     </Button>
-                    <RejectDialog onReject={(notes) => handleReject(item.evidenceId, notes)} />
+                    <DecisionDialog
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          <RotateCcw className="h-3.5 w-3.5" /> Request Revision
+                        </Button>
+                      }
+                      title="Request a revision from the candidate?"
+                      notesLabel="What should they fix or add? (shown to the candidate)"
+                      notesPlaceholder="e.g. Please include a README explaining how the project meets the roadmap's expected output."
+                      confirmLabel="Request Revision"
+                      confirmVariant="outline"
+                      onConfirm={(notes) => handleRequestRevision(item.evidenceId, notes)}
+                    />
+                    <DecisionDialog
+                      trigger={
+                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                          <XCircle className="h-3.5 w-3.5" /> Reject
+                        </Button>
+                      }
+                      title="Reject this evidence?"
+                      notesLabel="Reason (shown to the candidate)"
+                      notesPlaceholder="e.g. Screenshot is unreadable, please retake."
+                      confirmLabel="Reject"
+                      confirmVariant="destructive"
+                      onConfirm={(notes) => handleReject(item.evidenceId, notes)}
+                    />
                   </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ListChecks className="h-3.5 w-3.5 shrink-0" />
+                  Roadmap checklist: {item.stepsCompleted}/{item.totalSteps} steps complete
                 </div>
                 <a
                   href={item.evidenceUrl}
