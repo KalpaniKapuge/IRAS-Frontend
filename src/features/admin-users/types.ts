@@ -1,5 +1,10 @@
 import type { UserRole } from "@/types/enums";
 
+export interface CreateAdminUserRequest {
+  email: string;
+  password: string;
+}
+
 export interface UserSummaryDto {
   userId: number;
   email: string;

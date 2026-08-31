@@ -49,6 +49,7 @@ export function AuditLogsPage() {
               <TableHead>Admin</TableHead>
               <TableHead>Action</TableHead>
               <TableHead>Entity</TableHead>
+              <TableHead>Details</TableHead>
               <TableHead>IP Address</TableHead>
             </TableRow>
           </TableHeader>
@@ -59,6 +60,9 @@ export function AuditLogsPage() {
                 <TableCell className="text-sm font-medium">{log.userEmail ?? `User #${log.userId}`}</TableCell>
                 <TableCell><Badge variant="outline">{log.action}</Badge></TableCell>
                 <TableCell className="text-sm text-muted-foreground">{log.entityType} #{log.entityId}</TableCell>
+                <TableCell className="max-w-xs truncate text-sm text-muted-foreground" title={log.details ?? undefined}>
+                  {log.details ?? "—"}
+                </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{log.ipAddress ?? "—"}</TableCell>
               </TableRow>
             ))}

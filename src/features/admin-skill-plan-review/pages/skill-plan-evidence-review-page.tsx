@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,14 @@ import { formatDate } from "@/lib/format";
 import { titleCase } from "@/lib/utils";
 import { ApiError } from "@/types/common";
 import type { AdminEvidenceReviewDto } from "@/features/skill-improvement-plans/types";
-import { adminSkillPlanReviewApi } from "../api";
+import { adminSkillPlanReviewApi, type AdminReviewableStatus } from "../api";
+
+const STATUS_TABS: { value: AdminReviewableStatus; label: string }[] = [
+  { value: "Pending", label: "Pending" },
+  { value: "Approved", label: "Approved" },
+  { value: "Rejected", label: "Rejected" },
+  { value: "RevisionRequired", label: "Revision Required" },
+];
 
 // Reject and Request Revision share the same shape — a short comment the candidate will
 // see — so one dialog handles both instead of duplicating the form.
@@ -78,13 +87,20 @@ function DecisionDialog({
 }
 
 export function SkillPlanEvidenceReviewPage() {
+  const [status, setStatus] = useState<AdminReviewableStatus>("Pending");
   const [items, setItems] = useState<AdminEvidenceReviewDto[] | null>(null);
 
-  const load = () => adminSkillPlanReviewApi.getPending().then(setItems);
+  const load = () => {
+    setItems(null);
+    adminSkillPlanReviewApi.getByStatus(status).then(setItems);
+  };
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const isPendingView = status === "Pending";
 
   const handleApprove = async (evidenceId: number) => {
     try {
@@ -123,10 +139,22 @@ export function SkillPlanEvidenceReviewPage() {
         description="Evidence the automatic AI reviewer wasn't confident enough to auto-approve or auto-reject on its own — everything else is triaged automatically."
       />
 
+      <Tabs value={status} onValueChange={(v) => setStatus(v as AdminReviewableStatus)}>
+        <TabsList>
+          {STATUS_TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
       {items === null ? (
         <RowSkeletonList count={4} />
       ) : items.length === 0 ? (
-        <EmptyState icon={FileCheck2} title="Nothing pending review" description="New evidence submissions will show up here." />
+        <EmptyState
+          icon={FileCheck2}
+          title={isPendingView ? "Nothing pending review" : `No ${titleCase(status)} evidence`}
+          description={isPendingView ? "New evidence submissions will show up here." : "Decisions with this status will show up here."}
+        />
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
@@ -138,38 +166,41 @@ export function SkillPlanEvidenceReviewPage() {
                     <span className="text-sm text-muted-foreground">— {item.skillName}</span>
                     {item.jobTitle && <span className="text-sm text-muted-foreground">({item.jobTitle})</span>}
                     <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
+                    {!isPendingView && <StatusBadge enumName="EvidenceVerificationStatus" value={item.verificationStatus} />}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" onClick={() => handleApprove(item.evidenceId)}>
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Approve
-                    </Button>
-                    <DecisionDialog
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          <RotateCcw className="h-3.5 w-3.5" /> Request Revision
-                        </Button>
-                      }
-                      title="Request a revision from the candidate?"
-                      notesLabel="What should they fix or add? (shown to the candidate)"
-                      notesPlaceholder="e.g. Please include a README explaining how the project meets the roadmap's expected output."
-                      confirmLabel="Request Revision"
-                      confirmVariant="outline"
-                      onConfirm={(notes) => handleRequestRevision(item.evidenceId, notes)}
-                    />
-                    <DecisionDialog
-                      trigger={
-                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                          <XCircle className="h-3.5 w-3.5" /> Reject
-                        </Button>
-                      }
-                      title="Reject this evidence?"
-                      notesLabel="Reason (shown to the candidate)"
-                      notesPlaceholder="e.g. Screenshot is unreadable, please retake."
-                      confirmLabel="Reject"
-                      confirmVariant="destructive"
-                      onConfirm={(notes) => handleReject(item.evidenceId, notes)}
-                    />
-                  </div>
+                  {isPendingView && (
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" onClick={() => handleApprove(item.evidenceId)}>
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+                      </Button>
+                      <DecisionDialog
+                        trigger={
+                          <Button variant="outline" size="sm">
+                            <RotateCcw className="h-3.5 w-3.5" /> Request Revision
+                          </Button>
+                        }
+                        title="Request a revision from the candidate?"
+                        notesLabel="What should they fix or add? (shown to the candidate)"
+                        notesPlaceholder="e.g. Please include a README explaining how the project meets the roadmap's expected output."
+                        confirmLabel="Request Revision"
+                        confirmVariant="outline"
+                        onConfirm={(notes) => handleRequestRevision(item.evidenceId, notes)}
+                      />
+                      <DecisionDialog
+                        trigger={
+                          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                            <XCircle className="h-3.5 w-3.5" /> Reject
+                          </Button>
+                        }
+                        title="Reject this evidence?"
+                        notesLabel="Reason (shown to the candidate)"
+                        notesPlaceholder="e.g. Screenshot is unreadable, please retake."
+                        confirmLabel="Reject"
+                        confirmVariant="destructive"
+                        onConfirm={(notes) => handleReject(item.evidenceId, notes)}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ListChecks className="h-3.5 w-3.5 shrink-0" />
@@ -202,6 +233,14 @@ export function SkillPlanEvidenceReviewPage() {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">Submitted {formatDate(item.uploadedAt)}</p>
+                {!isPendingView && (item.verifierNotes || item.verifiedAt) && (
+                  <div className="rounded-lg border border-border bg-muted/20 p-2.5">
+                    {item.verifierNotes && <p className="text-sm text-foreground/90">{item.verifierNotes}</p>}
+                    {item.verifiedAt && (
+                      <p className="mt-1 text-xs text-muted-foreground">Decided {formatDate(item.verifiedAt)}</p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

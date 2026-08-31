@@ -6,5 +6,6 @@ export interface AuditLogDto {
   entityType: string;
   entityId: number;
   ipAddress: string | null;
+  details: string | null;
   createdAt: string;
 }

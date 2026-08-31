@@ -39,9 +39,4 @@ export const skillImprovementPlansApi = {
     http
       .put<SkillPlanEvidenceDto>(`${base(candidateId)}/${planId}/evidence/${evidenceId}/submit`, {})
       .then((r) => r.data),
-
-  updateProgress: (candidateId: number, planId: number, status: string) =>
-    http
-      .put<SkillImprovementPlanDto>(`${base(candidateId)}/${planId}/progress`, { status })
-      .then((r) => r.data),
 };

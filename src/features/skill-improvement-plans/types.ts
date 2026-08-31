@@ -89,4 +89,8 @@ export interface AdminEvidenceReviewDto {
   aiRationale: string | null;
   stepsCompleted: number;
   totalSteps: number;
+
+  // Populated only once a decision has been made — null while still Pending.
+  verifiedAt: string | null;
+  verifierNotes: string | null;
 }

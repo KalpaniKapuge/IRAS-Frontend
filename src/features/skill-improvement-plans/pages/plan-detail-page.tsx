@@ -74,16 +74,6 @@ export function PlanDetailPage() {
     }
   };
 
-  const handleUpdateProgress = async (status: string) => {
-    if (!plan) return;
-    try {
-      const updated = await skillImprovementPlansApi.updateProgress(candidateId, plan.planId, status);
-      setPlan(updated);
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Failed to update progress.");
-    }
-  };
-
   if (notFound) {
     return (
       <EmptyState
@@ -139,16 +129,12 @@ export function PlanDetailPage() {
       <Card>
         <CardContent className="space-y-2 p-5">
           <Label className="text-sm font-medium text-foreground">Your progress</Label>
-          {plan.status === "Verified" ? (
-            <p className="text-sm text-muted-foreground">
-              This skill has been verified — progress can no longer be changed.
-            </p>
-          ) : (
-            <>
-              <p className="text-xs text-muted-foreground">Click a stage to update where you are.</p>
-              <ProgressStepper status={plan.status} onSelect={handleUpdateProgress} />
-            </>
-          )}
+          <p className="text-xs text-muted-foreground">
+            {plan.status === "Verified"
+              ? "This skill has been verified."
+              : "Updates automatically as you complete roadmap steps below."}
+          </p>
+          <ProgressStepper status={plan.status} />
         </CardContent>
       </Card>
 
