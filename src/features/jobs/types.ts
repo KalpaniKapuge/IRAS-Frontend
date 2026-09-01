@@ -28,6 +28,7 @@ export interface JobDto {
   postedAt: string | null;
   closingDate: string | null;
   templateKey: string | null;
+  requireAssessment: boolean;
   applicationCount: number;
   requiredSkills: JobRequiredSkillDto[];
 }
@@ -56,6 +57,7 @@ export interface CreateJobRequest {
   location?: string;
   closingDate?: string | null;
   requiredSkills: JobRequiredSkillDto[];
+  requireAssessment: boolean;
 }
 
 export interface UpdateJobRequest {
@@ -68,6 +70,7 @@ export interface UpdateJobRequest {
   closingDate?: string | null;
   requiredSkills: JobRequiredSkillDto[];
   templateKey?: string | null;
+  requireAssessment: boolean;
 }
 
 export interface GenerateJdRequest {

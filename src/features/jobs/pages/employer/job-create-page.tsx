@@ -24,6 +24,7 @@ export function JobCreatePage() {
     employmentType: "FullTime",
     location: "",
     closingDate: "",
+    requireAssessment: false,
   });
   const [requiredSkills, setRequiredSkills] = useState<JobRequiredSkillDto[]>([]);
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
@@ -40,6 +41,7 @@ export function JobCreatePage() {
       location: values.location || undefined,
       closingDate: values.closingDate || undefined,
       requiredSkills,
+      requireAssessment: values.requireAssessment,
     });
     if (job) navigate(`/employer/jobs/${job.jobId}`);
   };

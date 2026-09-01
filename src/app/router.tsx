@@ -25,6 +25,8 @@ const JobsBrowsePage = () =>
   lazyPage(() => import("@/features/jobs/pages/jobs-browse-page").then((m) => ({ default: m.JobsBrowsePage })));
 const JobDetailPage = () =>
   lazyPage(() => import("@/features/jobs/pages/job-detail-page").then((m) => ({ default: m.JobDetailPage })));
+const JobAssessmentPage = () =>
+  lazyPage(() => import("@/features/assessments/pages/job-assessment-page").then((m) => ({ default: m.JobAssessmentPage })));
 const MyApplicationsPage = () =>
   lazyPage(() => import("@/features/applications/pages/my-applications-page").then((m) => ({ default: m.MyApplicationsPage })));
 const JobMatchesPage = () =>
@@ -110,6 +112,7 @@ const router = createBrowserRouter([
           { index: true, element: <CandidateDashboardPage /> },
           { path: "jobs", element: <JobsBrowsePage /> },
           { path: "jobs/:jobId", element: <JobDetailPage /> },
+          { path: "jobs/:jobId/assessment", element: <JobAssessmentPage /> },
           { path: "applications", element: <MyApplicationsPage /> },
           { path: "matches", element: <JobMatchesPage /> },
           { path: "skill-gaps", element: <SkillGapsPage /> },

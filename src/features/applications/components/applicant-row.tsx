@@ -59,6 +59,13 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
           <p className="text-lg font-semibold">{formatScore(applicant.totalScore)}%</p>
         </div>
 
+        {applicant.assessmentScore != null && (
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Assessment score</p>
+            <p className="text-lg font-semibold">{formatScore(applicant.assessmentScore)}%</p>
+          </div>
+        )}
+
         {isTerminal ? (
           <StatusBadge enumName="ApplicationStatus" value={applicant.status} />
         ) : (
@@ -109,6 +116,7 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
             experienceMatch={applicant.experienceMatch}
             educationMatch={applicant.educationMatch}
             semanticSimilarity={applicant.semanticSimilarity}
+            assessmentScore={applicant.assessmentScore}
             skillGaps={applicant.skillGaps}
           />
           {interviews.length > 0 && (

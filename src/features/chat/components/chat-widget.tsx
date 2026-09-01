@@ -5,7 +5,27 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useUiStore } from "@/stores/ui-store";
+import { useAuthStore } from "@/features/auth/store";
+import type { UserRole } from "@/types/enums";
 import { useChatStore } from "../store";
+
+// Copy only — actual scope enforcement for each role happens server-side
+// (ChatScopeGate + per-role system prompts), this just matches the widget's
+// wording to the persona the backend already enforces.
+const ROLE_COPY: Record<UserRole, { subtitle: string; emptyState: string }> = {
+  Candidate: {
+    subtitle: "Ask about your resume, skills & applications",
+    emptyState: "Hi! Ask me about your resume, skill gaps, applications, or how IRAS works.",
+  },
+  Employer: {
+    subtitle: "Ask about your job posts & applicants",
+    emptyState: "Hi! Ask me about your job postings, applicants, interviews, or how IRAS works.",
+  },
+  Admin: {
+    subtitle: "Ask about platform stats & administration",
+    emptyState: "Hi! Ask me about users, audit logs, evidence reviews, or how IRAS works.",
+  },
+};
 
 function ChatBubble({ sender, content }: { sender: "User" | "Bot"; content: string }) {
   const isBot = sender === "Bot";
@@ -33,6 +53,8 @@ function ChatBubble({ sender, content }: { sender: "User" | "Bot"; content: stri
 export function ChatWidget() {
   const chatOpen = useUiStore((s) => s.chatOpen);
   const setChatOpen = useUiStore((s) => s.setChatOpen);
+  const role = useAuthStore((s) => s.user?.role) ?? "Candidate";
+  const copy = ROLE_COPY[role];
   const { messages, isSending, loadHistory, sendMessage } = useChatStore();
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -62,7 +84,7 @@ export function ChatWidget() {
               </div>
               <div>
                 <p className="text-sm font-semibold leading-tight">IRAS Assistant</p>
-                <p className="text-[11px] text-muted-foreground">Ask about jobs, skills & applications</p>
+                <p className="text-[11px] text-muted-foreground">{copy.subtitle}</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setChatOpen(false)}>
@@ -74,7 +96,7 @@ export function ChatWidget() {
             <div className="space-y-3">
               {messages.length === 0 && (
                 <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
-                  Hi! Ask me about your resume, skill gaps, applications, or how IRAS works.
+                  {copy.emptyState}
                 </div>
               )}
               {messages.map((m) => (

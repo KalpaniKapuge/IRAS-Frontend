@@ -9,6 +9,7 @@ interface ScoreBreakdownProps {
   experienceMatch: number;
   educationMatch: number;
   semanticSimilarity: number;
+  assessmentScore?: number | null;
   skillGaps: SkillGapDto[];
 }
 
@@ -18,6 +19,7 @@ export function ScoreBreakdown({
   experienceMatch,
   educationMatch,
   semanticSimilarity,
+  assessmentScore,
   skillGaps,
 }: ScoreBreakdownProps) {
   return (
@@ -39,6 +41,11 @@ export function ScoreBreakdown({
         <div className="rounded-lg border border-border/80 bg-background/70 p-4">
           <ScoreBar value={semanticSimilarity} label="Resume relevance" />
         </div>
+        {assessmentScore != null && (
+          <div className="rounded-lg border border-border/80 bg-background/70 p-4">
+            <ScoreBar value={assessmentScore} label="Skill assessment" />
+          </div>
+        )}
       </div>
 
       {skillGaps.length > 0 && (

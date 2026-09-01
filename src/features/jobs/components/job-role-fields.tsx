@@ -1,3 +1,4 @@
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +15,7 @@ export interface JobRoleFieldsValue {
   employmentType: EmploymentType;
   location: string;
   closingDate: string;
+  requireAssessment: boolean;
 }
 
 interface JobRoleFieldsProps {
@@ -90,6 +92,23 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
         <div className="space-y-2">
           <Label>Closing date (optional)</Label>
           <Input type="date" value={values.closingDate} onChange={(e) => onChange({ closingDate: e.target.value })} />
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3 rounded-lg border border-border p-3">
+        <Checkbox
+          id="require-assessment"
+          checked={values.requireAssessment}
+          onCheckedChange={(checked) => onChange({ requireAssessment: checked === true })}
+        />
+        <div className="space-y-1">
+          <Label htmlFor="require-assessment" className="cursor-pointer">
+            Require a skill assessment before candidates can apply
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            Candidates must pass a short AI-generated quiz on this role's required skills before they can submit an
+            application. Their score is shown alongside their CV match when you review applicants.
+          </p>
         </div>
       </div>
     </div>

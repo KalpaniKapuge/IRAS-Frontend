@@ -28,6 +28,7 @@ function toRoleFieldsValue(job: JobDto): JobRoleFieldsValue {
     employmentType: job.employmentType,
     location: job.location ?? "",
     closingDate: job.closingDate ? job.closingDate.slice(0, 10) : "",
+    requireAssessment: job.requireAssessment,
   };
 }
 
@@ -108,6 +109,7 @@ export function JobEditPage() {
       closingDate: editValues.closingDate || undefined,
       requiredSkills: editSkills,
       templateKey: job.templateKey ?? undefined,
+      requireAssessment: editValues.requireAssessment,
     });
     if (!ok) return;
 
@@ -130,6 +132,7 @@ export function JobEditPage() {
         closingDate: job.closingDate ?? undefined,
         requiredSkills: job.requiredSkills,
         templateKey,
+        requireAssessment: job.requireAssessment,
       });
       if (!ok) return;
     }

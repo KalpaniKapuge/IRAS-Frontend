@@ -18,6 +18,7 @@ export interface ApplicationDto {
   experienceMatch: number;
   educationMatch: number;
   semanticSimilarity: number;
+  assessmentScore: number | null;
   appliedAt: string;
   skillGaps: SkillGapDto[];
 }
@@ -32,6 +33,7 @@ export interface RankedApplicantDto {
   experienceMatch: number;
   educationMatch: number;
   semanticSimilarity: number;
+  assessmentScore: number | null;
   appliedAt: string;
   skillGaps: SkillGapDto[];
 }
