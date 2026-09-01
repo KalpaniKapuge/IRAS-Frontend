@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Pencil, Sparkles, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Eye, Pencil, Sparkles, Trash2, Users } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ export function JobEditPage() {
   const [jdDraft, setJdDraft] = useState("");
   const [dirty, setDirty] = useState(false);
   const [templateKey, setTemplateKey] = useState<JobTemplateKey | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editValues, setEditValues] = useState<JobRoleFieldsValue | null>(null);
@@ -80,6 +81,7 @@ export function JobEditPage() {
   const isDraft = job.status === "Draft";
   const canEditDetails = job.status === "Draft" || job.status === "Published";
   const Template = JOB_TEMPLATES[(job.templateKey as JobTemplateKey) ?? "modern"] ?? JOB_TEMPLATES.modern;
+  const PreviewTemplate = JOB_TEMPLATES[templateKey ?? "modern"] ?? JOB_TEMPLATES.modern;
 
   const handleGenerate = async () => {
     await generateJd(employerId, job.jobId, { additionalNotes: notes || undefined });
@@ -247,6 +249,15 @@ export function JobEditPage() {
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Choose a template</p>
                   <TemplatePicker value={templateKey} onChange={setTemplateKey} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={!templateKey}
+                    onClick={() => setIsPreviewOpen(true)}
+                  >
+                    <Eye className="h-4 w-4" /> Preview appearance
+                  </Button>
                 </div>
                 <ConfirmAction
                   trigger={<Button className="w-full" disabled={!job.generatedJd || !templateKey}>Publish job</Button>}
@@ -338,6 +349,20 @@ export function JobEditPage() {
                 </Button>
               </div>
             </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Candidate preview</DialogTitle>
+            <DialogDescription>
+              This is exactly how the posting will appear once published — the template can't be changed afterward.
+            </DialogDescription>
+          </DialogHeader>
+          {templateKey && (
+            <PreviewTemplate job={{ ...job, templateKey }} actionSlot={<Button size="lg" disabled>Apply now</Button>} />
           )}
         </DialogContent>
       </Dialog>

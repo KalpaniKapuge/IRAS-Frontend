@@ -34,6 +34,9 @@ export interface RankedApplicantDto {
   educationMatch: number;
   semanticSimilarity: number;
   assessmentScore: number | null;
+  totalMarks: number;
+  resumeFileUrl: string;
+  resumeFileFormat: string;
   appliedAt: string;
   skillGaps: SkillGapDto[];
 }

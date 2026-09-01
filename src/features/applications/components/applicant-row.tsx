@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarClock, ChevronDown } from "lucide-react";
+import { CalendarClock, ChevronDown, ClipboardList, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +13,7 @@ import { ScheduleInterviewDialog } from "@/features/interviews/components/schedu
 import { InterviewListItem } from "@/features/interviews/components/interview-list-item";
 import { ScoreBreakdown } from "./score-breakdown";
 import { FeedbackReviewDialog } from "./feedback-review-dialog";
+import { AssessmentReviewDialog } from "./assessment-review-dialog";
 import type { RankedApplicantDto } from "../types";
 import type { InterviewDto } from "@/features/interviews/types";
 
@@ -55,16 +56,11 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
           <p className="text-xs text-muted-foreground">Applied {formatDate(applicant.appliedAt)}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs text-muted-foreground">Match score</p>
-          <p className="text-lg font-semibold">{formatScore(applicant.totalScore)}%</p>
+          <p className="text-xs text-muted-foreground">
+            Total marks {applicant.assessmentScore != null && <span className="opacity-70">(CV + quiz)</span>}
+          </p>
+          <p className="text-lg font-semibold">{formatScore(applicant.totalMarks)}%</p>
         </div>
-
-        {applicant.assessmentScore != null && (
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">Assessment score</p>
-            <p className="text-lg font-semibold">{formatScore(applicant.assessmentScore)}%</p>
-          </div>
-        )}
 
         {isTerminal ? (
           <StatusBadge enumName="ApplicationStatus" value={applicant.status} />
@@ -78,6 +74,26 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
               ))}
             </SelectContent>
           </Select>
+        )}
+
+        <Button variant="outline" size="sm" asChild>
+          <a href={applicant.resumeFileUrl}>
+            <FileText className="h-3.5 w-3.5" /> View CV
+          </a>
+        </Button>
+
+        {applicant.assessmentScore != null && (
+          <AssessmentReviewDialog
+            employerId={employerId}
+            jobId={jobId}
+            applicationId={applicant.applicationId}
+            candidateName={applicant.candidateName}
+            trigger={
+              <Button variant="outline" size="sm">
+                <ClipboardList className="h-3.5 w-3.5" /> View quiz
+              </Button>
+            }
+          />
         )}
 
         {applicant.status === "Rejected" && (
