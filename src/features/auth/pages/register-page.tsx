@@ -78,7 +78,7 @@ export function RegisterPage() {
       });
       const user = useAuthStore.getState().user;
       navigate(user ? ROLE_HOME[user.role] : "/", { replace: true });
-      toast.success("Account created — welcome to IRAS!");
+      toast.success("Account created — welcome to Merito!");
     } catch (err) {
       if (!(err instanceof ApiError)) {
         setFormError("Registration failed. Please try again.");
@@ -121,7 +121,7 @@ export function RegisterPage() {
       title="Create your account"
       description="Get started with intelligent, transparent recruitment."
       panelHeadline="Recruit with confidence"
-      panelDescription="IRAS reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible."
+      panelDescription="Merito reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible."
       panelPoints={["Automated résumé parsing", "Explainable candidate ranking", "Skill-gap analysis built in"]}
     >
       <Tabs value={role} onValueChange={handleRoleChange} className="mb-6">

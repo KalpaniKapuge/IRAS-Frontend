@@ -113,7 +113,7 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
             >
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. IRAS Recruitment Platform" maxLength={150} />
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. E-commerce Analytics Dashboard" maxLength={150} />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>

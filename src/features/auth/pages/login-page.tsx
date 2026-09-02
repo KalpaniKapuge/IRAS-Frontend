@@ -74,7 +74,7 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      description="Sign in to continue to your IRAS dashboard."
+      description="Sign in to continue to your Merito dashboard."
       panelHeadline="Pick up right where you left off"
       panelDescription="Your shortlists, rankings, and skill-gap insights are waiting — sign in to keep hiring moving."
       panelPoints={["Live application tracking", "One dashboard for every role", "Decisions you can explain"]}

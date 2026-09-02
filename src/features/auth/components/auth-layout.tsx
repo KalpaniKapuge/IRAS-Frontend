@@ -16,7 +16,7 @@ interface AuthLayoutProps {
 
 const DEFAULT_HEADLINE = "Recruit with confidence";
 const DEFAULT_DESCRIPTION =
-  "IRAS reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible.";
+  "Merito reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible.";
 const DEFAULT_POINTS = ["Automated résumé parsing", "Explainable candidate ranking", "Skill-gap analysis built in"];
 
 // Split layout: a full-bleed recruitment photo on the left (the reference's "image on the
@@ -48,21 +48,22 @@ export function AuthLayout({
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* Brand tint (kept subtle so the photo stays visible) + a bottom-up shade that
-            gives the headline and bullets enough contrast to sit on the image. */}
-        <div className="absolute inset-0 bg-primary/25 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-primary/5" />
+        {/* Darkening stack so the white text stays readable over a bright photo:
+            a brand-blue multiply tint + a bottom-weighted black gradient that still
+            keeps some shade at the top for the logo. */}
+        <div className="absolute inset-0 bg-primary/45 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/40" />
 
         <div className="absolute left-9 top-9 z-20">
-          <Logo className="[&_p:first-child]:text-white [&_p:last-child]:text-white/70" />
+          <Logo className="[&_p:first-child]:text-white [&_p:last-child]:text-white/80 [&_p]:[text-shadow:0_1px_10px_rgba(0,0,0,0.55)]" />
         </div>
 
-        <div className="relative z-20 mt-auto max-w-md p-10 xl:p-14">
+        <div className="relative z-20 mt-auto max-w-md p-10 [&_*]:[text-shadow:0_1px_12px_rgba(0,0,0,0.55)] xl:p-14">
           <h2 className="text-3xl font-bold leading-tight text-white xl:text-4xl">{panelHeadline}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/85">{panelDescription}</p>
+          <p className="mt-3 text-sm leading-relaxed text-white">{panelDescription}</p>
           <ul className="mt-6 space-y-2.5">
             {panelPoints.map((point) => (
-              <li key={point} className="flex items-center gap-2.5 text-sm font-medium text-white/90">
+              <li key={point} className="flex items-center gap-2.5 text-sm font-semibold text-white">
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />
                 {point}
               </li>

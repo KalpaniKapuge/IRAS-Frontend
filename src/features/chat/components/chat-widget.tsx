@@ -15,15 +15,15 @@ import { useChatStore } from "../store";
 const ROLE_COPY: Record<UserRole, { subtitle: string; emptyState: string }> = {
   Candidate: {
     subtitle: "Ask about your resume, skills & applications",
-    emptyState: "Hi! Ask me about your resume, skill gaps, applications, or how IRAS works.",
+    emptyState: "Hi! Ask me about your resume, skill gaps, applications, or how Merito works.",
   },
   Employer: {
     subtitle: "Ask about your job posts & applicants",
-    emptyState: "Hi! Ask me about your job postings, applicants, interviews, or how IRAS works.",
+    emptyState: "Hi! Ask me about your job postings, applicants, interviews, or how Merito works.",
   },
   Admin: {
     subtitle: "Ask about platform stats & administration",
-    emptyState: "Hi! Ask me about users, audit logs, evidence reviews, or how IRAS works.",
+    emptyState: "Hi! Ask me about users, audit logs, evidence reviews, or how Merito works.",
   },
 };
 
@@ -83,7 +83,7 @@ export function ChatWidget() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-sm font-semibold leading-tight">IRAS Assistant</p>
+                <p className="text-sm font-semibold leading-tight">Merito Assistant</p>
                 <p className="text-[11px] text-muted-foreground">{copy.subtitle}</p>
               </div>
             </div>

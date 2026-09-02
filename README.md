@@ -1,9 +1,10 @@
-# IRAS Frontend
+# Merito Frontend
 
-Frontend for the **Intelligent Recruitment Automation System** — an AI-powered recruitment
-platform covering job description generation, resume parsing, candidate ranking, skill-gap
-analysis, automated job-candidate matching, candidate feedback, and a recruitment-specific
-chatbot, built for Candidate, Employer, and Admin workflows.
+Frontend for **Merito** ("Hiring on merit.") — the Intelligent Recruitment Automation
+System, an AI-powered recruitment platform covering job description generation, resume
+parsing, candidate ranking, skill-gap analysis, automated job-candidate matching, candidate
+feedback, and a recruitment-specific chatbot, built for Candidate, Employer, and Admin
+workflows. (The codebase and the ASP.NET Core API keep the `IRAS` namespace.)
 
 ## Stack
 
