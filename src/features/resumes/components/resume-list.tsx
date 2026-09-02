@@ -34,8 +34,8 @@ export function ResumeList({ resumes }: { resumes: ResumeDto[] }) {
                 <FileText className="h-5 w-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">{resume.fileFormat} Resume</p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="truncate font-medium">{resume.fileName ?? resume.sourceCvTitle ?? `${resume.fileFormat} Resume`}</p>
                   {resume.isPrimary && (
                     <Badge variant="default" className="gap-1">
                       <Star className="h-3 w-3 fill-current" /> Primary

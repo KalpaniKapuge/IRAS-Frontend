@@ -175,7 +175,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
                   <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
                     <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <span className="truncate">
-                      {resume.sourceCvTitle ?? `${resume.fileFormat} Resume`} {resume.isPrimary && "(Primary)"}
+                      {resume.fileName ?? resume.sourceCvTitle ?? `${resume.fileFormat} Resume`} {resume.isPrimary && "(Primary)"}
                     </span>
                   </span>
                   <span
