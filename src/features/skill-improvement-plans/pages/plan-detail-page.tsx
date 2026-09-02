@@ -242,17 +242,19 @@ export function PlanDetailPage() {
                         <Badge variant="muted">{titleCase(item.evidenceType)}</Badge>
                         <StatusBadge enumName="EvidenceVerificationStatus" value={item.verificationStatus} />
                       </div>
-                      <ConfirmAction
-                        trigger={
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        }
-                        title="Remove this evidence?"
-                        variant="destructive"
-                        confirmLabel="Remove"
-                        onConfirm={() => handleRemoveEvidence(item.evidenceId)}
-                      />
+                      {item.verificationStatus === "Draft" && (
+                        <ConfirmAction
+                          trigger={
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          }
+                          title="Remove this evidence?"
+                          variant="destructive"
+                          confirmLabel="Remove"
+                          onConfirm={() => handleRemoveEvidence(item.evidenceId)}
+                        />
+                      )}
                     </div>
                     <a
                       href={item.evidenceUrl}
