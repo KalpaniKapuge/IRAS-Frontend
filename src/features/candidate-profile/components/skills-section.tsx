@@ -10,9 +10,12 @@ import { SkillPicker } from "@/features/skill-taxonomy/components/skill-picker";
 import type { SkillDto } from "@/features/skill-taxonomy/types";
 import { PROFICIENCY_LEVELS, type ProficiencyLevel } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { clamp, sanitizeDecimal } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { CandidateSkillDto } from "../types";
+
+const MAX_YEARS_EXP = 50;
 
 export function SkillsSection({ candidateId, skills }: { candidateId: number; skills: CandidateSkillDto[] }) {
   const upsertSkill = useCandidateProfileStore((s) => s.upsertSkill);
@@ -31,7 +34,8 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
 
   const handleAdd = async () => {
     if (!pendingSkill) return;
-    await upsertSkill(candidateId, { skillId: pendingSkill.skillId, proficiency, yearsExp: Number(yearsExp) || 0 });
+    const years = clamp(Number(yearsExp) || 0, 0, MAX_YEARS_EXP);
+    await upsertSkill(candidateId, { skillId: pendingSkill.skillId, proficiency, yearsExp: years });
     setPendingSkill(null);
   };
 
@@ -71,12 +75,12 @@ export function SkillsSection({ candidateId, skills }: { candidateId: number; sk
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Years</p>
                 <Input
-                  type="number"
-                  min={0}
-                  step={0.5}
+                  type="text"
+                  inputMode="decimal"
                   className="h-9 w-20"
                   value={yearsExp}
-                  onChange={(e) => setYearsExp(e.target.value)}
+                  onChange={(e) => setYearsExp(sanitizeDecimal(e.target.value, 2))}
+                  placeholder="0–50"
                 />
               </div>
               <Button type="submit" size="sm">Add skill</Button>

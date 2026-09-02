@@ -27,9 +27,9 @@ export const registerSchema = z
       .email("Enter a valid email address."),
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password."),
-    firstName: z.string().trim().optional(),
-    lastName: z.string().trim().optional(),
-    companyName: z.string().trim().optional(),
+    firstName: z.string().trim().max(60, "First name is too long.").optional(),
+    lastName: z.string().trim().max(60, "Last name is too long.").optional(),
+    companyName: z.string().trim().max(150, "Company name is too long.").optional(),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {

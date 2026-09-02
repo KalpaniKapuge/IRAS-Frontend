@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EDUCATION_LEVELS } from "@/types/enums";
 import { getInitials, titleCase } from "@/lib/utils";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { FieldError } from "@/components/shared/field-error";
+import { isValidUrl, sanitizeName, sanitizePhone } from "@/lib/validation";
 import { useCandidateProfileStore } from "../store";
 import type { CandidateProfileDto } from "../types";
 
@@ -34,6 +36,7 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
   const [linkedInUrl, setLinkedInUrl] = useState(profile.linkedInUrl ?? "");
   const [educationLevel, setEducationLevel] = useState(profile.educationLevel);
   const [optInMatching, setOptInMatching] = useState(profile.optInMatching);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   useEffect(() => {
@@ -49,6 +52,13 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
   }, [profile]);
 
   const handleSave = async () => {
+    const errors: Record<string, string> = {};
+    if (phone && phone.length !== 10) errors.phone = "Enter a 10-digit phone number.";
+    if (!isValidUrl(githubUrl)) errors.githubUrl = "Enter a valid URL (e.g. https://github.com/yourusername).";
+    if (!isValidUrl(linkedInUrl)) errors.linkedInUrl = "Enter a valid URL (e.g. https://linkedin.com/in/yourusername).";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     await updateProfile(candidateId, {
       firstName,
       lastName,
@@ -187,11 +197,11 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>First name</Label>
-                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <Input value={firstName} onChange={(e) => setFirstName(sanitizeName(e.target.value))} maxLength={60} />
               </div>
               <div className="space-y-2">
                 <Label>Last name</Label>
-                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input value={lastName} onChange={(e) => setLastName(sanitizeName(e.target.value))} maxLength={60} />
               </div>
             </div>
             <div className="space-y-2">
@@ -200,16 +210,27 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
                 placeholder="e.g. Backend Engineer specializing in .NET & distributed systems"
+                maxLength={150}
               />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <Label>Citizenship</Label>
-                <Input value={citizenship} onChange={(e) => setCitizenship(e.target.value)} />
+                <Input value={citizenship} onChange={(e) => setCitizenship(sanitizeName(e.target.value))} maxLength={60} />
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <Input
+                  type="tel"
+                  inputMode="numeric"
+                  value={phone}
+                  onChange={(e) => setPhone(sanitizePhone(e.target.value))}
+                  placeholder="10-digit phone number"
+                  maxLength={10}
+                  aria-invalid={!!fieldErrors.phone}
+                  className={fieldErrors.phone ? "border-destructive focus-visible:ring-destructive" : undefined}
+                />
+                <FieldError message={fieldErrors.phone} />
               </div>
               <div className="space-y-2">
                 <Label>Education level</Label>
@@ -231,18 +252,26 @@ export function ProfileHeaderCard({ profile, candidateId }: { profile: Candidate
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5"><Github className="h-3.5 w-3.5" /> GitHub profile URL</Label>
                 <Input
+                  type="url"
                   value={githubUrl}
                   onChange={(e) => setGithubUrl(e.target.value)}
                   placeholder="https://github.com/yourusername"
+                  aria-invalid={!!fieldErrors.githubUrl}
+                  className={fieldErrors.githubUrl ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
+                <FieldError message={fieldErrors.githubUrl} />
               </div>
               <div className="space-y-2">
                 <Label className="flex items-center gap-1.5"><Linkedin className="h-3.5 w-3.5" /> LinkedIn profile URL</Label>
                 <Input
+                  type="url"
                   value={linkedInUrl}
                   onChange={(e) => setLinkedInUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/yourusername"
+                  aria-invalid={!!fieldErrors.linkedInUrl}
+                  className={fieldErrors.linkedInUrl ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
+                <FieldError message={fieldErrors.linkedInUrl} />
               </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">

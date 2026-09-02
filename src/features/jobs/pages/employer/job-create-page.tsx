@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/features/auth/store";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { clamp, todayIsoDate } from "@/lib/validation";
 import { useJobsStore } from "../../store";
 import { RequiredSkillsEditor } from "../../components/required-skills-editor";
 import { JobRoleFields, type JobRoleFieldsValue } from "../../components/job-role-fields";
@@ -29,13 +30,16 @@ export function JobCreatePage() {
   const [requiredSkills, setRequiredSkills] = useState<JobRequiredSkillDto[]>([]);
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
-  const canSubmit = values.title.trim().length > 0 && requiredSkills.length > 0;
+  const canSubmit =
+    values.title.trim().length > 0 &&
+    requiredSkills.length > 0 &&
+    (!values.closingDate || values.closingDate >= todayIsoDate());
 
   const handleSubmit = async () => {
     const job = await createJob(employerId, {
       title: values.title.trim(),
       seniorityLevel: values.seniorityLevel,
-      minExpYears: Number(values.minExpYears) || 0,
+      minExpYears: clamp(Number(values.minExpYears) || 0, 0, 50),
       educationReq: values.educationReq,
       employmentType: values.employmentType,
       location: values.location || undefined,

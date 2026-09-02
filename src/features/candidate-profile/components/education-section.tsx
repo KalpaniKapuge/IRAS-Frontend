@@ -14,9 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FieldError } from "@/components/shared/field-error";
+import { sanitizeInteger } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { EducationDto, EducationFormValues } from "../types";
+
+const MIN_YEAR = 1950;
+const MAX_YEAR = new Date().getFullYear() + 1;
 
 const emptyForm: EducationFormValues = {
   degree: "",
@@ -36,6 +41,7 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<EducationFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [yearError, setYearError] = useState<string | undefined>();
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
@@ -50,7 +56,24 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
     setOpen(true);
   };
 
+  const validateYears = (startYear: number | null, endYear: number | null) => {
+    if (startYear !== null && (startYear < MIN_YEAR || startYear > MAX_YEAR)) {
+      return `Start year must be between ${MIN_YEAR} and ${MAX_YEAR}.`;
+    }
+    if (endYear !== null && (endYear < MIN_YEAR || endYear > MAX_YEAR)) {
+      return `End year must be between ${MIN_YEAR} and ${MAX_YEAR}.`;
+    }
+    if (startYear !== null && endYear !== null && endYear < startYear) {
+      return "End year can't be before start year.";
+    }
+    return undefined;
+  };
+
   const handleSubmit = async () => {
+    const error = validateYears(form.startYear, form.endYear);
+    setYearError(error);
+    if (error) return;
+
     setSaving(true);
     try {
       if (editingId) await updateEducation(candidateId, editingId, form);
@@ -87,41 +110,57 @@ export function EducationSection({ candidateId, educations }: { candidateId: num
             >
               <div className="space-y-2">
                 <Label>Degree</Label>
-                <Input value={form.degree} onChange={(e) => setForm({ ...form, degree: e.target.value })} />
+                <Input value={form.degree} onChange={(e) => setForm({ ...form, degree: e.target.value })} maxLength={100} />
               </div>
               <div className="space-y-2">
                 <Label>Institution</Label>
-                <Input value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} />
+                <Input value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} maxLength={150} />
               </div>
               <div className="space-y-2">
                 <Label>Field of study</Label>
                 <Input
                   value={form.fieldOfStudy ?? ""}
                   onChange={(e) => setForm({ ...form, fieldOfStudy: e.target.value })}
+                  maxLength={100}
                 />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-2">
                   <Label>Start year</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={form.startYear ?? ""}
-                    onChange={(e) => setForm({ ...form, startYear: e.target.value ? Number(e.target.value) : null })}
+                    onChange={(e) => {
+                      const digits = sanitizeInteger(e.target.value);
+                      setForm({ ...form, startYear: digits ? Number(digits) : null });
+                    }}
+                    placeholder="e.g. 2020"
+                    aria-invalid={!!yearError}
+                    className={yearError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>End year</Label>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={form.endYear ?? ""}
-                    onChange={(e) => setForm({ ...form, endYear: e.target.value ? Number(e.target.value) : null })}
+                    onChange={(e) => {
+                      const digits = sanitizeInteger(e.target.value);
+                      setForm({ ...form, endYear: digits ? Number(digits) : null });
+                    }}
+                    placeholder="e.g. 2024, or blank if ongoing"
+                    aria-invalid={!!yearError}
+                    className={yearError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Grade</Label>
-                  <Input value={form.grade ?? ""} onChange={(e) => setForm({ ...form, grade: e.target.value })} />
+                  <Input value={form.grade ?? ""} onChange={(e) => setForm({ ...form, grade: e.target.value })} maxLength={30} />
                 </div>
               </div>
+              <FieldError message={yearError} />
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Cancel

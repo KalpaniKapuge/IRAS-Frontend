@@ -12,9 +12,10 @@ import { ROLE_HOME } from "@/config/nav";
 import { ApiError } from "@/types/common";
 import type { UserRole } from "@/types/enums";
 import { mapBackendFieldErrors } from "@/lib/field-errors";
+import { sanitizeName } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { FieldError } from "@/components/shared/field-error";
 import { AuthLayout } from "../components/auth-layout";
-import { FieldError } from "../components/field-error";
 import { PasswordStrength } from "../components/password-strength";
 import { flattenZodErrors, registerSchema } from "../validation";
 
@@ -123,7 +124,8 @@ export function RegisterPage() {
               <Input
                 id="firstName"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) => setFirstName(sanitizeName(e.target.value))}
+                maxLength={60}
                 aria-invalid={!!fieldErrors.firstName}
                 className={fieldErrors.firstName ? "border-destructive focus-visible:ring-destructive" : undefined}
               />
@@ -134,7 +136,8 @@ export function RegisterPage() {
               <Input
                 id="lastName"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) => setLastName(sanitizeName(e.target.value))}
+                maxLength={60}
                 aria-invalid={!!fieldErrors.lastName}
                 className={fieldErrors.lastName ? "border-destructive focus-visible:ring-destructive" : undefined}
               />
@@ -148,6 +151,7 @@ export function RegisterPage() {
               id="companyName"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
+              maxLength={150}
               aria-invalid={!!fieldErrors.companyName}
               className={fieldErrors.companyName ? "border-destructive focus-visible:ring-destructive" : undefined}
             />

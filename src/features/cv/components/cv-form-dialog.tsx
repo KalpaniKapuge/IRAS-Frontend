@@ -124,7 +124,7 @@ export function CvFormDialog() {
             </div>
             <div className="space-y-2 flex-1">
               <Label>CV title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Backend Engineer CV" />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Backend Engineer CV" maxLength={150} />
             </div>
           </div>
 

@@ -10,8 +10,8 @@ import { useAuthStore } from "@/features/auth/store";
 import { ROLE_HOME } from "@/config/nav";
 import { ApiError } from "@/types/common";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { FieldError } from "@/components/shared/field-error";
 import { AuthLayout } from "../components/auth-layout";
-import { FieldError } from "../components/field-error";
 import { loginSchema, flattenZodErrors } from "../validation";
 
 export function LoginPage() {

@@ -171,7 +171,7 @@ export function CvEditorPage() {
                   </div>
                   <div className="space-y-2 flex-1">
                     <Label>Title</Label>
-                    <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                    <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} />
                   </div>
                 </div>
 

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SkillPicker } from "@/features/skill-taxonomy/components/skill-picker";
 import type { SkillDto } from "@/features/skill-taxonomy/types";
 import { IMPORTANCE_LEVELS, type ImportanceLevel } from "@/types/enums";
+import { clamp, sanitizeInteger } from "@/lib/validation";
 import type { JobRequiredSkillDto } from "../types";
 
 interface RequiredSkillsEditorProps {
@@ -54,11 +55,14 @@ export function RequiredSkillsEditor({ value, onChange }: RequiredSkillsEditorPr
               </Select>
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Input
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
                   className="h-8 w-16"
                   value={skill.minYears}
-                  onChange={(e) => updateSkill(skill.skillId, { minYears: Number(e.target.value) || 0 })}
+                  onChange={(e) => {
+                    const digits = sanitizeInteger(e.target.value, 2);
+                    updateSkill(skill.skillId, { minYears: clamp(digits ? Number(digits) : 0, 0, 50) });
+                  }}
                 />
                 yrs min
               </div>

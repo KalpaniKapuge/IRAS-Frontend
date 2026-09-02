@@ -13,6 +13,8 @@ import { ApiError } from "@/types/common";
 import { COMPANY_SIZES, type CompanySize } from "@/types/enums";
 import { useAuthStore } from "@/features/auth/store";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { FieldError } from "@/components/shared/field-error";
+import { isValidUrl } from "@/lib/validation";
 import { employerProfileApi } from "../api";
 import type { EmployerProfileDto } from "../types";
 
@@ -32,6 +34,7 @@ export function EmployerProfilePage() {
   const [website, setWebsite] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
+  const [websiteError, setWebsiteError] = useState<string | undefined>();
 
   const load = () =>
     employerProfileApi.get(employerId).then((p) => {
@@ -54,6 +57,12 @@ export function EmployerProfilePage() {
   if (!profile) return <PageSpinner label="Loading company profile…" />;
 
   const handleSave = async () => {
+    if (!isValidUrl(website)) {
+      setWebsiteError("Enter a valid URL (e.g. https://yourcompany.com).");
+      return;
+    }
+    setWebsiteError(undefined);
+
     setIsSaving(true);
     try {
       await employerProfileApi.update(employerId, {
@@ -153,11 +162,11 @@ export function EmployerProfilePage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Company name</Label>
-              <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+              <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} maxLength={150} />
             </div>
             <div className="space-y-2">
               <Label>Industry</Label>
-              <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Software & IT Services" />
+              <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. Software & IT Services" maxLength={100} />
             </div>
             <div className="space-y-2">
               <Label>Company size</Label>
@@ -172,11 +181,19 @@ export function EmployerProfilePage() {
             </div>
             <div className="space-y-2">
               <Label>Website</Label>
-              <Input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://…" />
+              <Input
+                type="url"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                placeholder="https://…"
+                aria-invalid={!!websiteError}
+                className={websiteError ? "border-destructive focus-visible:ring-destructive" : undefined}
+              />
+              <FieldError message={websiteError} />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Location</Label>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={150} />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>About the company</Label>

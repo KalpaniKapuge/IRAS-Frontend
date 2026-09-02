@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FieldError } from "@/components/shared/field-error";
 import { formatDate } from "@/lib/format";
+import { isValidUrl } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { ProjectDto, ProjectFormValues } from "../types";
@@ -42,6 +44,7 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ProjectFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ projectUrl?: string; dates?: string }>({});
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
@@ -57,6 +60,14 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
   };
 
   const handleSubmit = async () => {
+    const errors: { projectUrl?: string; dates?: string } = {};
+    if (!isValidUrl(form.projectUrl ?? "")) errors.projectUrl = "Enter a valid URL (e.g. https://github.com/you/project).";
+    if (form.startDate && form.endDate && form.endDate < form.startDate) {
+      errors.dates = "End date can't be before the start date.";
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setSaving(true);
     try {
       // The backend validates projectUrl with [Url], which (unlike a plain optional
@@ -102,7 +113,7 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
             >
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. IRAS Recruitment Platform" />
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. IRAS Recruitment Platform" maxLength={150} />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -115,7 +126,15 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
               </div>
               <div className="space-y-2">
                 <Label>Project URL (optional)</Label>
-                <Input value={form.projectUrl ?? ""} onChange={(e) => setForm({ ...form, projectUrl: e.target.value })} placeholder="https://…" />
+                <Input
+                  type="url"
+                  value={form.projectUrl ?? ""}
+                  onChange={(e) => setForm({ ...form, projectUrl: e.target.value })}
+                  placeholder="https://…"
+                  aria-invalid={!!fieldErrors.projectUrl}
+                  className={fieldErrors.projectUrl ? "border-destructive focus-visible:ring-destructive" : undefined}
+                />
+                <FieldError message={fieldErrors.projectUrl} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -124,6 +143,8 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
                     type="date"
                     value={toDateInputValue(form.startDate)}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value || null })}
+                    aria-invalid={!!fieldErrors.dates}
+                    className={fieldErrors.dates ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
                 <div className="space-y-2">
@@ -132,9 +153,12 @@ export function ProjectsSection({ candidateId, projects }: { candidateId: number
                     type="date"
                     value={toDateInputValue(form.endDate)}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value || null })}
+                    aria-invalid={!!fieldErrors.dates}
+                    className={fieldErrors.dates ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
               </div>
+              <FieldError message={fieldErrors.dates} />
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Cancel

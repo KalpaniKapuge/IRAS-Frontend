@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FieldError } from "@/components/shared/field-error";
 import { formatDate } from "@/lib/format";
+import { todayIsoDate } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { WorkExperienceDto, WorkExperienceFormValues } from "../types";
@@ -50,6 +52,7 @@ export function ExperienceSection({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<WorkExperienceFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [dateError, setDateError] = useState<string | undefined>();
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const openAdd = () => {
@@ -65,6 +68,17 @@ export function ExperienceSection({
   };
 
   const handleSubmit = async () => {
+    const today = todayIsoDate();
+    if (form.startDate > today) {
+      setDateError("Start date can't be in the future.");
+      return;
+    }
+    if (!form.isCurrent && form.endDate && form.endDate < form.startDate) {
+      setDateError("End date can't be before the start date.");
+      return;
+    }
+    setDateError(undefined);
+
     setSaving(true);
     try {
       const payload: WorkExperienceFormValues = {
@@ -106,11 +120,11 @@ export function ExperienceSection({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Job title</Label>
-                  <Input value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} />
+                  <Input value={form.jobTitle} onChange={(e) => setForm({ ...form, jobTitle: e.target.value })} maxLength={100} />
                 </div>
                 <div className="space-y-2">
                   <Label>Company</Label>
-                  <Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
+                  <Input value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} maxLength={150} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -118,8 +132,11 @@ export function ExperienceSection({
                   <Label>Start date</Label>
                   <Input
                     type="date"
+                    max={todayIsoDate()}
                     value={toDateInputValue(form.startDate)}
                     onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                    aria-invalid={!!dateError}
+                    className={dateError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
                 <div className="space-y-2">
@@ -127,11 +144,15 @@ export function ExperienceSection({
                   <Input
                     type="date"
                     disabled={form.isCurrent}
+                    max={todayIsoDate()}
                     value={toDateInputValue(form.endDate)}
                     onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                    aria-invalid={!!dateError}
+                    className={dateError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
               </div>
+              <FieldError message={dateError} />
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
                   checked={form.isCurrent}

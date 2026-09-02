@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FieldError } from "@/components/shared/field-error";
 import { formatDate } from "@/lib/format";
+import { todayIsoDate } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { CertificationDto, CertificationFormValues } from "../types";
@@ -67,11 +69,18 @@ export function CertificationsSection({
   const [form, setForm] = useState<CertificationFormValues>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [dateError, setDateError] = useState<string | undefined>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const existingFileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const { ref, onKeyDown, onFocus } = useEnterKeyNav<HTMLFormElement>();
 
   const handleSubmit = async () => {
+    if (form.issueDate && form.expiryDate && form.expiryDate < form.issueDate) {
+      setDateError("Expiry date can't be before the issue date.");
+      return;
+    }
+    setDateError(undefined);
+
     setSaving(true);
     try {
       await addCertification(candidateId, form);
@@ -134,19 +143,22 @@ export function CertificationsSection({
             >
               <div className="space-y-2">
                 <Label>Name</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={150} />
               </div>
               <div className="space-y-2">
                 <Label>Issuing organization</Label>
-                <Input value={form.issuingOrg ?? ""} onChange={(e) => setForm({ ...form, issuingOrg: e.target.value })} />
+                <Input value={form.issuingOrg ?? ""} onChange={(e) => setForm({ ...form, issuingOrg: e.target.value })} maxLength={150} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>Issue date</Label>
                   <Input
                     type="date"
+                    max={todayIsoDate()}
                     value={form.issueDate?.slice(0, 10) ?? ""}
                     onChange={(e) => setForm({ ...form, issueDate: e.target.value || null })}
+                    aria-invalid={!!dateError}
+                    className={dateError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
                 <div className="space-y-2">
@@ -155,9 +167,12 @@ export function CertificationsSection({
                     type="date"
                     value={form.expiryDate?.slice(0, 10) ?? ""}
                     onChange={(e) => setForm({ ...form, expiryDate: e.target.value || null })}
+                    aria-invalid={!!dateError}
+                    className={dateError ? "border-destructive focus-visible:ring-destructive" : undefined}
                   />
                 </div>
               </div>
+              <FieldError message={dateError} />
               <div className="space-y-2">
                 <Label>Certificate file</Label>
                 <input

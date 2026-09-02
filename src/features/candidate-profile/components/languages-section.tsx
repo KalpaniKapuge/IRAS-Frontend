@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmAction } from "@/components/shared/confirm-action";
 import { EmptyState } from "@/components/shared/empty-state";
+import { sanitizeName } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { useCandidateProfileStore } from "../store";
 import type { LanguageDto, LanguageFormValues } from "../types";
@@ -85,8 +86,9 @@ export function LanguagesSection({ candidateId, languages }: { candidateId: numb
                 <Label>Language</Label>
                 <Input
                   value={form.languageName}
-                  onChange={(e) => setForm({ ...form, languageName: e.target.value })}
+                  onChange={(e) => setForm({ ...form, languageName: sanitizeName(e.target.value) })}
                   placeholder="e.g. Spanish"
+                  maxLength={40}
                 />
               </div>
               <div className="space-y-2">
@@ -95,6 +97,7 @@ export function LanguagesSection({ candidateId, languages }: { candidateId: numb
                   value={form.proficiency}
                   onChange={(e) => setForm({ ...form, proficiency: e.target.value })}
                   placeholder="e.g. Fluent, Native, B2"
+                  maxLength={30}
                 />
               </div>
               <DialogFooter>

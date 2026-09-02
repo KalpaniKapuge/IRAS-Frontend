@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EDUCATION_LEVELS, EMPLOYMENT_TYPES, type EducationLevel, type EmploymentType } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { sanitizeInteger, todayIsoDate } from "@/lib/validation";
 
 export const SENIORITY_LEVELS = ["Internship", "Junior", "Mid-Level", "Senior", "Lead", "Principal"];
 
@@ -32,6 +33,7 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
           value={values.title}
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. Senior Backend Engineer"
+          maxLength={150}
         />
       </div>
 
@@ -72,10 +74,11 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
         <div className="space-y-2">
           <Label>Minimum experience (years)</Label>
           <Input
-            type="number"
-            min={0}
+            type="text"
+            inputMode="numeric"
             value={values.minExpYears}
-            onChange={(e) => onChange({ minExpYears: e.target.value })}
+            onChange={(e) => onChange({ minExpYears: sanitizeInteger(e.target.value, 2) })}
+            placeholder="0–50"
           />
         </div>
       </div>
@@ -87,11 +90,17 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
             value={values.location}
             onChange={(e) => onChange({ location: e.target.value })}
             placeholder="e.g. Colombo, Sri Lanka / Remote"
+            maxLength={150}
           />
         </div>
         <div className="space-y-2">
           <Label>Closing date (optional)</Label>
-          <Input type="date" value={values.closingDate} onChange={(e) => onChange({ closingDate: e.target.value })} />
+          <Input
+            type="date"
+            min={todayIsoDate()}
+            value={values.closingDate}
+            onChange={(e) => onChange({ closingDate: e.target.value })}
+          />
         </div>
       </div>
 

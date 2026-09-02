@@ -12,6 +12,7 @@ import { ConfirmAction } from "@/components/shared/confirm-action";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { useAuthStore } from "@/features/auth/store";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
+import { clamp, todayIsoDate } from "@/lib/validation";
 import { useJobsStore } from "../../store";
 import { RequiredSkillsEditor } from "../../components/required-skills-editor";
 import { JobRoleFields, type JobRoleFieldsValue } from "../../components/job-role-fields";
@@ -104,7 +105,7 @@ export function JobEditPage() {
     const ok = await updateJob(employerId, job.jobId, {
       title: editValues.title.trim(),
       seniorityLevel: editValues.seniorityLevel,
-      minExpYears: Number(editValues.minExpYears) || 0,
+      minExpYears: clamp(Number(editValues.minExpYears) || 0, 0, 50),
       educationReq: editValues.educationReq,
       employmentType: editValues.employmentType,
       location: editValues.location || undefined,
@@ -343,7 +344,11 @@ export function JobEditPage() {
                 <Button
                   type="submit"
                   loading={isMutating}
-                  disabled={!editValues.title.trim() || editSkills.length === 0}
+                  disabled={
+                    !editValues.title.trim() ||
+                    editSkills.length === 0 ||
+                    (!!editValues.closingDate && editValues.closingDate < todayIsoDate())
+                  }
                 >
                   Save changes
                 </Button>

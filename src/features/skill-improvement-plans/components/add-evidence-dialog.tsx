@@ -17,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ApiError } from "@/types/common";
 import { LINK_EVIDENCE_TYPES, SKILL_EVIDENCE_TYPES, type SkillEvidenceType } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
+import { isValidUrl } from "@/lib/validation";
+import { FieldError } from "@/components/shared/field-error";
 import { skillImprovementPlansApi } from "../api";
 
 const isLinkType = (type: SkillEvidenceType) => (LINK_EVIDENCE_TYPES as readonly string[]).includes(type);
@@ -45,6 +47,8 @@ export function AddEvidenceDialog({
   };
 
   const handleSubmit = async () => {
+    if (isLinkType(evidenceType) && !isValidUrl(url)) return;
+
     setIsSaving(true);
     try {
       if (isLinkType(evidenceType)) {
@@ -68,7 +72,12 @@ export function AddEvidenceDialog({
     }
   };
 
-  const canSubmit = isLinkType(evidenceType) ? url.trim().length > 0 : file !== null;
+  const urlError = isLinkType(evidenceType) && url.length > 0 && !isValidUrl(url)
+    ? "Enter a valid URL (e.g. https://github.com/you/project)."
+    : undefined;
+  const canSubmit = isLinkType(evidenceType)
+    ? url.trim().length > 0 && isValidUrl(url)
+    : file !== null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
@@ -95,7 +104,15 @@ export function AddEvidenceDialog({
           {isLinkType(evidenceType) ? (
             <div className="space-y-2">
               <Label>URL</Label>
-              <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://github.com/you/project" />
+              <Input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://github.com/you/project"
+                aria-invalid={!!urlError}
+                className={urlError ? "border-destructive focus-visible:ring-destructive" : undefined}
+              />
+              <FieldError message={urlError} />
             </div>
           ) : (
             <div className="space-y-2">
