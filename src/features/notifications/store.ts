@@ -7,6 +7,7 @@ interface NotificationState {
   isLoading: boolean;
   fetch: () => Promise<void>;
   markAsRead: (id: number) => Promise<void>;
+  remove: (id: number) => Promise<void>;
   unreadCount: () => number;
 }
 
@@ -30,6 +31,17 @@ export const useNotificationStore = create<NotificationState>()((set, get) => ({
       await notificationsApi.markAsRead(id);
     } catch {
       // best-effort; a background refetch will reconcile if this silently failed
+    }
+  },
+
+  remove: async (id) => {
+    const prev = get().items;
+    set({ items: prev.filter((n) => n.notificationId !== id) });
+    try {
+      await notificationsApi.remove(id);
+    } catch {
+      // rollback if the server rejected the delete
+      set({ items: prev });
     }
   },
 

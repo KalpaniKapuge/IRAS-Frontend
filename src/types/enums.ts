@@ -72,10 +72,12 @@ export type ResumeFormat = (typeof RESUME_FORMATS)[number];
 export const PARSE_STATUSES = ["Pending", "Parsed", "Failed", "ManuallyEdited"] as const;
 export type ParseStatus = (typeof PARSE_STATUSES)[number];
 
-export const NOTIFICATION_TYPES = ["JobMatch", "ApplicationUpdate", "Feedback", "System"] as const;
+// Mirrors backend IRAS.Domain.Enums.NotificationType.
+export const NOTIFICATION_TYPES = ["JobMatch", "ApplicationUpdate", "Feedback", "System", "Interview"] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
-export const RELATED_ENTITY_TYPES = ["Job", "Application", "Feedback", "Resume"] as const;
+// Mirrors backend IRAS.Domain.Enums.RelatedEntityType.
+export const RELATED_ENTITY_TYPES = ["Job", "Application", "Feedback", "Candidate", "Interview"] as const;
 export type RelatedEntityType = (typeof RELATED_ENTITY_TYPES)[number];
 
 export const DELIVERY_CHANNELS = ["InApp", "Email", "Both"] as const;
