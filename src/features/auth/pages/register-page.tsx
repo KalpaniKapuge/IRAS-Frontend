@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { AlertCircle, UserPlus } from "lucide-react";
+import { AlertCircle, Building2, Lock, Mail, User, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -15,7 +15,10 @@ import { mapBackendFieldErrors } from "@/lib/field-errors";
 import { sanitizeName } from "@/lib/validation";
 import { useEnterKeyNav } from "@/hooks/use-enter-key-navigation";
 import { FieldError } from "@/components/shared/field-error";
+import { cn } from "@/lib/utils";
 import { AuthLayout } from "../components/auth-layout";
+import { InputIcon } from "../components/input-icon";
+import { SocialAuth } from "../components/social-auth";
 import { PasswordStrength } from "../components/password-strength";
 import { flattenZodErrors, registerSchema } from "../validation";
 
@@ -23,6 +26,7 @@ type FormRole = Extract<UserRole, "Candidate" | "Employer">;
 
 export function RegisterPage() {
   const register = useAuthStore((s) => s.register);
+  const loginWithGoogle = useAuthStore((s) => s.loginWithGoogle);
   const isLoading = useAuthStore((s) => s.isLoading);
   const navigate = useNavigate();
 
@@ -97,14 +101,48 @@ export function RegisterPage() {
     }
   };
 
+  const handleGoogleCredential = useCallback(
+    async (idToken: string) => {
+      setFormError(null);
+      try {
+        await loginWithGoogle({ idToken, role });
+        const user = useAuthStore.getState().user;
+        navigate(user ? ROLE_HOME[user.role] : "/", { replace: true });
+        toast.success("Signed in with Google.");
+      } catch (err) {
+        setFormError(err instanceof ApiError ? err.message : "Google sign-in failed. Please try again.");
+      }
+    },
+    [loginWithGoogle, navigate, role],
+  );
+
   return (
-    <AuthLayout title="Create your account" description="Get started with intelligent, transparent recruitment.">
+    <AuthLayout
+      title="Create your account"
+      description="Get started with intelligent, transparent recruitment."
+      panelHeadline="Recruit with confidence"
+      panelDescription="IRAS reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible."
+      panelPoints={["Automated résumé parsing", "Explainable candidate ranking", "Skill-gap analysis built in"]}
+    >
       <Tabs value={role} onValueChange={handleRoleChange} className="mb-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="Candidate">I'm a Candidate</TabsTrigger>
-          <TabsTrigger value="Employer">I'm an Employer</TabsTrigger>
+        <TabsList className="grid h-12 w-full grid-cols-2 rounded-full p-1.5">
+          <TabsTrigger value="Candidate" className="rounded-full font-semibold data-[state=active]:shadow-elevated">
+            I'm a Candidate
+          </TabsTrigger>
+          <TabsTrigger value="Employer" className="rounded-full font-semibold data-[state=active]:shadow-elevated">
+            I'm an Employer
+          </TabsTrigger>
         </TabsList>
       </Tabs>
+
+      <div className="mb-6">
+        <SocialAuth
+          action="Sign up"
+          onGoogleCredential={handleGoogleCredential}
+          note={`Continue with Google to join as ${role === "Employer" ? "an employer" : "a candidate"}.`}
+          busy={isLoading}
+        />
+      </div>
 
       <form ref={ref} onKeyDownCapture={onKeyDown} onFocus={onFocus} onSubmit={handleSubmit} noValidate className="space-y-4">
         {formError && (
@@ -121,96 +159,114 @@ export function RegisterPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="firstName">First name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(sanitizeName(e.target.value))}
-                maxLength={60}
-                aria-invalid={!!fieldErrors.firstName}
-                className={fieldErrors.firstName ? "border-destructive focus-visible:ring-destructive" : undefined}
-              />
+              <div className="relative">
+                <InputIcon icon={User} />
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(sanitizeName(e.target.value))}
+                  maxLength={60}
+                  aria-invalid={!!fieldErrors.firstName}
+                  className={cn("h-12 rounded-full pl-10", fieldErrors.firstName && "border-destructive focus-visible:ring-destructive")}
+                />
+              </div>
               <FieldError message={fieldErrors.firstName} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(sanitizeName(e.target.value))}
-                maxLength={60}
-                aria-invalid={!!fieldErrors.lastName}
-                className={fieldErrors.lastName ? "border-destructive focus-visible:ring-destructive" : undefined}
-              />
+              <div className="relative">
+                <InputIcon icon={User} />
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(sanitizeName(e.target.value))}
+                  maxLength={60}
+                  aria-invalid={!!fieldErrors.lastName}
+                  className={cn("h-12 rounded-full pl-10", fieldErrors.lastName && "border-destructive focus-visible:ring-destructive")}
+                />
+              </div>
               <FieldError message={fieldErrors.lastName} />
             </div>
           </div>
         ) : (
           <div className="space-y-2">
             <Label htmlFor="companyName">Company name</Label>
-            <Input
-              id="companyName"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              maxLength={150}
-              aria-invalid={!!fieldErrors.companyName}
-              className={fieldErrors.companyName ? "border-destructive focus-visible:ring-destructive" : undefined}
-            />
+            <div className="relative">
+              <InputIcon icon={Building2} />
+              <Input
+                id="companyName"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                maxLength={150}
+                aria-invalid={!!fieldErrors.companyName}
+                className={cn("h-12 rounded-full pl-10", fieldErrors.companyName && "border-destructive focus-visible:ring-destructive")}
+              />
+            </div>
             <FieldError message={fieldErrors.companyName} />
           </div>
         )}
 
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
-            aria-invalid={!!fieldErrors.email}
-            className={fieldErrors.email ? "border-destructive focus-visible:ring-destructive" : undefined}
-          />
+          <div className="relative">
+            <InputIcon icon={Mail} />
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              aria-invalid={!!fieldErrors.email}
+              className={cn("h-12 rounded-full pl-10", fieldErrors.email && "border-destructive focus-visible:ring-destructive")}
+            />
+          </div>
           <FieldError message={fieldErrors.email} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <PasswordInput
-            id="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 8 characters"
-            aria-invalid={!!fieldErrors.password}
-            className={fieldErrors.password ? "border-destructive focus-visible:ring-destructive" : undefined}
-          />
+          <div className="relative">
+            <InputIcon icon={Lock} />
+            <PasswordInput
+              id="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              aria-invalid={!!fieldErrors.password}
+              className={cn("h-12 rounded-full pl-10", fieldErrors.password && "border-destructive focus-visible:ring-destructive")}
+            />
+          </div>
           <FieldError message={fieldErrors.password} />
           <PasswordStrength password={password} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirm password</Label>
-          <PasswordInput
-            id="confirmPassword"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Re-enter your password"
-            aria-invalid={!!fieldErrors.confirmPassword}
-            className={fieldErrors.confirmPassword ? "border-destructive focus-visible:ring-destructive" : undefined}
-          />
+          <div className="relative">
+            <InputIcon icon={Lock} />
+            <PasswordInput
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+              aria-invalid={!!fieldErrors.confirmPassword}
+              className={cn("h-12 rounded-full pl-10", fieldErrors.confirmPassword && "border-destructive focus-visible:ring-destructive")}
+            />
+          </div>
           <FieldError message={fieldErrors.confirmPassword} />
         </div>
 
-        <Button type="submit" className="w-full" loading={isLoading}>
+        <Button type="submit" className="h-12 w-full rounded-full" loading={isLoading}>
           <UserPlus className="h-4 w-4" /> Create account
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-primary hover:underline">
+        <Link to="/login" className="font-semibold text-primary hover:underline">
           Sign in
         </Link>
       </p>

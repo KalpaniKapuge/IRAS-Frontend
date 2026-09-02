@@ -4,7 +4,7 @@ import { setAccessToken, setUnauthorizedHandler } from "@/lib/api-client";
 import { ApiError } from "@/types/common";
 import type { UserRole } from "@/types/enums";
 import { authApi } from "./api";
-import type { LoginRequest, RegisterRequest } from "./types";
+import type { GoogleLoginRequest, LoginRequest, RegisterRequest } from "./types";
 
 interface AuthUser {
   userId: number;
@@ -19,6 +19,7 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (payload: LoginRequest) => Promise<void>;
+  loginWithGoogle: (payload: GoogleLoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
   clearError: () => void;
@@ -46,6 +47,23 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (err) {
           set({ isLoading: false, error: err instanceof ApiError ? err.message : "Login failed." });
+          throw err;
+        }
+      },
+
+      loginWithGoogle: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          const res = await authApi.google(payload);
+          setAccessToken(res.token);
+          set({
+            user: { userId: res.userId, email: res.email, role: res.role },
+            token: res.token,
+            expiresAt: res.expiresAt,
+            isLoading: false,
+          });
+        } catch (err) {
+          set({ isLoading: false, error: err instanceof ApiError ? err.message : "Google sign-in failed." });
           throw err;
         }
       },

@@ -14,6 +14,11 @@ export interface RegisterRequest {
   companyName?: string;
 }
 
+export interface GoogleLoginRequest {
+  idToken: string;
+  role?: Extract<UserRole, "Candidate" | "Employer">;
+}
+
 export interface AuthResponse {
   userId: number;
   email: string;

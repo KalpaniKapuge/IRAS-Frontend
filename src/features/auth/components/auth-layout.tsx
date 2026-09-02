@@ -1,86 +1,88 @@
-import { BarChart3, MessageSquareText, ShieldCheck, Sparkles, Target } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { cn } from "@/lib/utils";
-
-const HIGHLIGHTS = [
-  { icon: Sparkles, text: "AI-drafted, bias-checked job descriptions" },
-  { icon: Target, text: "Explainable candidate ranking & skill-gap coaching" },
-  { icon: MessageSquareText, text: "Every rejection comes with real, actionable feedback" },
-  { icon: ShieldCheck, text: "A human always makes the final call — AI only assists" },
-];
 
 interface AuthLayoutProps {
   title: string;
   description: string;
   children: React.ReactNode;
-  
-  imageSrc?: string;
+  /** Left-panel headline. */
+  panelHeadline?: string;
+  /** Left-panel supporting line. */
+  panelDescription?: string;
+  /** Left-panel bullet points. */
+  panelPoints?: string[];
 }
 
-export function AuthLayout({ title, description, children, imageSrc }: AuthLayoutProps) {
-  return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-slate-950 p-10 text-white lg:flex">
-        {imageSrc ? (
-          <>
-            <img src={imageSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/30" />
-          </>
-        ) : (
-          <>
-            <div
-              className="absolute inset-0 opacity-40"
-              style={{
-                background:
-                  "radial-gradient(60% 50% at 15% 10%, hsl(var(--primary) / 0.55), transparent), radial-gradient(50% 40% at 90% 80%, hsl(199 89% 46% / 0.45), transparent)",
-              }}
-            />
-            <div className="absolute inset-0 bg-grid opacity-[0.08]" />
-          </>
-        )}
+const DEFAULT_HEADLINE = "Recruit with confidence";
+const DEFAULT_DESCRIPTION =
+  "IRAS reads every résumé, ranks every applicant, and shows you exactly why — so hiring decisions are fast and defensible.";
+const DEFAULT_POINTS = ["Automated résumé parsing", "Explainable candidate ranking", "Skill-gap analysis built in"];
 
-        <div className="relative z-10">
-          <Logo className="[&_p:first-child]:text-white [&_p:last-child]:text-white/60" />
+// Split layout: a full-bleed recruitment photo on the left (the reference's "image on the
+// left" pattern) with a brand-gradient wash for legibility, and the form on the right.
+//
+// The seam between the two halves is a smooth curve — an SVG whose right edge sits exactly
+// on the column divider and whose left edge bows into the photo. It's filled with the
+// `background` theme token, so it blends into the form panel in both light and dark mode.
+// preserveAspectRatio="none" makes the bulge depth a fixed fraction of the SVG's width
+// (≈7vw) regardless of viewport height, so it can't balloon out and cover the photo the
+// way a viewport-sized circle would.
+//
+// The photo is served from Unsplash's CDN (free license) with alt="" (decorative). The
+// gradient container sits behind it, so the panel still looks intentional if the image
+// fails to load.
+export function AuthLayout({
+  title,
+  description,
+  children,
+  panelHeadline = DEFAULT_HEADLINE,
+  panelDescription = DEFAULT_DESCRIPTION,
+  panelPoints = DEFAULT_POINTS,
+}: AuthLayoutProps) {
+  return (
+    <div className="relative grid min-h-screen overflow-hidden bg-background lg:grid-cols-2">
+      <div className="relative hidden flex-col overflow-hidden bg-gradient-to-br from-primary via-chart-2 to-chart-5 lg:flex">
+        <img
+          src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1000&h=1300&q=80"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Brand tint (kept subtle so the photo stays visible) + a bottom-up shade that
+            gives the headline and bullets enough contrast to sit on the image. */}
+        <div className="absolute inset-0 bg-primary/25 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-primary/5" />
+
+        <div className="absolute left-9 top-9 z-20">
+          <Logo className="[&_p:first-child]:text-white [&_p:last-child]:text-white/70" />
         </div>
 
-        <div className="relative z-10 max-w-md space-y-8">
-          <h2 className="text-3xl font-semibold leading-tight text-balance">
-            Recruitment, reimagined with AI — for employers and candidates alike.
-          </h2>
-
-          <ul className="space-y-3.5">
-            {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-start gap-3 text-sm text-white/85">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15">
-                  <Icon className="h-3.5 w-3.5" />
-                </span>
-                {text}
+        <div className="relative z-20 mt-auto max-w-md p-10 xl:p-14">
+          <h2 className="text-3xl font-bold leading-tight text-white xl:text-4xl">{panelHeadline}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/85">{panelDescription}</p>
+          <ul className="mt-6 space-y-2.5">
+            {panelPoints.map((point) => (
+              <li key={point} className="flex items-center gap-2.5 text-sm font-medium text-white/90">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />
+                {point}
               </li>
             ))}
           </ul>
-
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-            <div className="flex items-center justify-between text-xs text-white/60">
-              <span className="flex items-center gap-1.5">
-                <BarChart3 className="h-3.5 w-3.5" /> Sample match score
-              </span>
-              <span className="font-semibold text-white">87%</span>
-            </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-primary to-sky-400" />
-            </div>
-          </div>
         </div>
-
-        <p className="relative z-10 text-xs text-white/50">
-          © {new Date().getFullYear()} Intelligent Recruitment Automation System
-        </p>
       </div>
 
-      <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-y-0 left-1/2 z-10 hidden h-full w-[16vw] -translate-x-1/2 text-background lg:block"
+      >
+        <path fill="currentColor" d="M50 0 H100 V100 H50 C6 74 6 26 50 0 Z" />
+      </svg>
+
+      <div className="relative z-30 flex flex-col justify-center bg-background px-6 py-12 sm:px-12 lg:px-16 xl:px-20">
         <div className="mx-auto w-full max-w-sm">
-          <div className={cn("mb-8 flex items-center justify-between lg:mb-10 lg:justify-end")}>
+          <div className="mb-8 flex items-center justify-between lg:mb-10 lg:justify-end">
             <div className="lg:hidden">
               <Logo />
             </div>
@@ -88,7 +90,7 @@ export function AuthLayout({ title, description, children, imageSrc }: AuthLayou
           </div>
 
           <div className="space-y-1.5">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
             <p className="text-sm text-muted-foreground">{description}</p>
           </div>
 

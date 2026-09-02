@@ -11,6 +11,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Always run on 5173 (fail loudly instead of silently hopping to 5174/5175). Google
+    // OAuth checks the exact origin, so a predictable port means one "Authorized JavaScript
+    // origin" to configure. If startup fails with "port in use", stop the stale dev server
+    // (`npx kill-port 5173`) and retry.
+    strictPort: true,
     open: false,
   },
   build: {
