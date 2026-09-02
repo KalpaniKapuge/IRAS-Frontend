@@ -1,4 +1,4 @@
-import { Briefcase, Building2, Calendar, GraduationCap, MapPin, Sparkles, Timer } from "lucide-react";
+import { Briefcase, Building2, Calendar, GraduationCap, Home, MapPin, Sparkles, Timer } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 import { titleCase } from "@/lib/utils";
@@ -46,6 +46,7 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatTile icon={Sparkles} label="Seniority" value={job.seniorityLevel} className="bg-primary text-primary-foreground" />
         <StatTile icon={Briefcase} label="Type" value={titleCase(job.employmentType)} className="bg-chart-2 text-white" />
+        <StatTile icon={Home} label="Arrangement" value={titleCase(job.workArrangement)} className="bg-chart-5 text-white" />
         <StatTile icon={Timer} label="Experience" value={`${job.minExpYears}+ yrs`} className="bg-chart-3 text-white" />
         <StatTile icon={GraduationCap} label="Education" value={`${titleCase(job.educationReq)}+`} className="bg-success text-success-foreground" />
         {job.location && (

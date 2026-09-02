@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, BriefcaseBusiness, Building2, CalendarClock, MapPin, Sparkles } from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness, Building2, CalendarClock, Home, MapPin, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
@@ -41,6 +41,10 @@ export function JobCard({ job, to }: { job: JobSummaryDto; to: string }) {
             <span className="flex items-center gap-1.5">
               <BriefcaseBusiness className="h-3.5 w-3.5 text-primary" />
                 {titleCase(job.employmentType)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Home className="h-3.5 w-3.5 text-primary" />
+              {titleCase(job.workArrangement)}
             </span>
             {job.location && (
               <span className="flex items-center gap-1.5">

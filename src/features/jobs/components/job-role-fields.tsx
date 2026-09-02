@@ -2,9 +2,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { EDUCATION_LEVELS, EMPLOYMENT_TYPES, type EducationLevel, type EmploymentType } from "@/types/enums";
+import { EDUCATION_LEVELS, EMPLOYMENT_TYPES, WORK_ARRANGEMENTS, type EducationLevel, type EmploymentType, type WorkArrangement } from "@/types/enums";
 import { titleCase } from "@/lib/utils";
-import { sanitizeInteger, todayIsoDate } from "@/lib/validation";
+import { sanitizeInteger, tomorrowIsoDate } from "@/lib/validation";
 
 export const SENIORITY_LEVELS = ["Internship", "Junior", "Mid-Level", "Senior", "Lead", "Principal"];
 
@@ -14,6 +14,7 @@ export interface JobRoleFieldsValue {
   minExpYears: string;
   educationReq: EducationLevel;
   employmentType: EmploymentType;
+  workArrangement: WorkArrangement;
   location: string;
   closingDate: string;
   requireAssessment: boolean;
@@ -37,7 +38,7 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-2">
           <Label>Seniority level</Label>
           <Select value={values.seniorityLevel} onValueChange={(v) => onChange({ seniorityLevel: v })}>
@@ -61,6 +62,17 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
           </Select>
         </div>
         <div className="space-y-2">
+          <Label>Work arrangement</Label>
+          <Select value={values.workArrangement} onValueChange={(v) => onChange({ workArrangement: v as WorkArrangement })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {WORK_ARRANGEMENTS.map((arrangement) => (
+                <SelectItem key={arrangement} value={arrangement}>{titleCase(arrangement)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
           <Label>Minimum education</Label>
           <Select value={values.educationReq} onValueChange={(v) => onChange({ educationReq: v as EducationLevel })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -78,7 +90,7 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
             inputMode="numeric"
             value={values.minExpYears}
             onChange={(e) => onChange({ minExpYears: sanitizeInteger(e.target.value, 2) })}
-            placeholder="0–50"
+            placeholder="0–30"
           />
         </div>
       </div>
@@ -97,7 +109,7 @@ export function JobRoleFields({ values, onChange }: JobRoleFieldsProps) {
           <Label>Closing date (optional)</Label>
           <Input
             type="date"
-            min={todayIsoDate()}
+            min={tomorrowIsoDate()}
             value={values.closingDate}
             onChange={(e) => onChange({ closingDate: e.target.value })}
           />

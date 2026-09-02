@@ -66,6 +66,7 @@ export function JobsModerationPage() {
               <TableHead>Job</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Arrangement</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Posted</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -77,6 +78,7 @@ export function JobsModerationPage() {
                 <TableCell className="font-medium">{job.title}</TableCell>
                 <TableCell className="text-muted-foreground">{job.companyName ?? "—"}</TableCell>
                 <TableCell className="text-muted-foreground">{titleCase(job.employmentType)}</TableCell>
+                <TableCell className="text-muted-foreground">{titleCase(job.workArrangement)}</TableCell>
                 <TableCell><StatusBadge enumName="JobStatus" value={job.status} /></TableCell>
                 <TableCell className="text-muted-foreground">{job.postedAt ? formatDate(job.postedAt) : "—"}</TableCell>
                 <TableCell className="text-right">

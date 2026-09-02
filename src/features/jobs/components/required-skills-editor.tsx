@@ -61,7 +61,7 @@ export function RequiredSkillsEditor({ value, onChange }: RequiredSkillsEditorPr
                   value={skill.minYears}
                   onChange={(e) => {
                     const digits = sanitizeInteger(e.target.value, 2);
-                    updateSkill(skill.skillId, { minYears: clamp(digits ? Number(digits) : 0, 0, 50) });
+                    updateSkill(skill.skillId, { minYears: clamp(digits ? Number(digits) : 0, 0, 30) });
                   }}
                 />
                 yrs min

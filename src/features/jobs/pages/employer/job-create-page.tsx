@@ -23,6 +23,7 @@ export function JobCreatePage() {
     minExpYears: "2",
     educationReq: "Bachelor",
     employmentType: "FullTime",
+    workArrangement: "OnSite",
     location: "",
     closingDate: "",
     requireAssessment: false,
@@ -33,15 +34,16 @@ export function JobCreatePage() {
   const canSubmit =
     values.title.trim().length > 0 &&
     requiredSkills.length > 0 &&
-    (!values.closingDate || values.closingDate >= todayIsoDate());
+    (!values.closingDate || values.closingDate > todayIsoDate());
 
   const handleSubmit = async () => {
     const job = await createJob(employerId, {
       title: values.title.trim(),
       seniorityLevel: values.seniorityLevel,
-      minExpYears: clamp(Number(values.minExpYears) || 0, 0, 50),
+      minExpYears: clamp(Number(values.minExpYears) || 0, 0, 30),
       educationReq: values.educationReq,
       employmentType: values.employmentType,
+      workArrangement: values.workArrangement,
       location: values.location || undefined,
       closingDate: values.closingDate || undefined,
       requiredSkills,

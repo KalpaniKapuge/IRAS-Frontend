@@ -29,8 +29,16 @@ export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 export const COMPANY_SIZES = ["Small", "Medium", "Large", "Enterprise"] as const;
 export type CompanySize = (typeof COMPANY_SIZES)[number];
 
-export const EMPLOYMENT_TYPES = ["FullTime", "PartTime", "Contract", "Internship", "Temporary"] as const;
+// "Remote" here matches the backend's IRAS.Domain.Enums.EmploymentType exactly — this list
+// previously said "Temporary", which doesn't exist on the backend enum and would 400 on
+// submit the same way the minExpYears/closingDate range mismatches did.
+export const EMPLOYMENT_TYPES = ["FullTime", "PartTime", "Contract", "Internship", "Remote"] as const;
 export type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
+
+// New: work location arrangement, independent of EmploymentType (a FullTime role can be
+// OnSite, Remote, or Hybrid) — mirrors backend's IRAS.Domain.Enums.WorkArrangement.
+export const WORK_ARRANGEMENTS = ["OnSite", "Remote", "Hybrid"] as const;
+export type WorkArrangement = (typeof WORK_ARRANGEMENTS)[number];
 
 export const JOB_STATUSES = ["Draft", "Published", "Closed", "Archived"] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];

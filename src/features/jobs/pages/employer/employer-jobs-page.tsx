@@ -57,7 +57,7 @@ export function EmployerJobsPage() {
                     {job.title}
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {job.seniorityLevel} · {titleCase(job.employmentType)}
+                    {job.seniorityLevel} · {titleCase(job.employmentType)} · {titleCase(job.workArrangement)}
                     {job.location ? ` · ${job.location}` : ""}
                   </p>
                   <p className="text-xs text-muted-foreground">

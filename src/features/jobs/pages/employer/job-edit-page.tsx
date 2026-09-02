@@ -27,6 +27,7 @@ function toRoleFieldsValue(job: JobDto): JobRoleFieldsValue {
     minExpYears: String(job.minExpYears),
     educationReq: job.educationReq,
     employmentType: job.employmentType,
+    workArrangement: job.workArrangement,
     location: job.location ?? "",
     closingDate: job.closingDate ? job.closingDate.slice(0, 10) : "",
     requireAssessment: job.requireAssessment,
@@ -105,9 +106,10 @@ export function JobEditPage() {
     const ok = await updateJob(employerId, job.jobId, {
       title: editValues.title.trim(),
       seniorityLevel: editValues.seniorityLevel,
-      minExpYears: clamp(Number(editValues.minExpYears) || 0, 0, 50),
+      minExpYears: clamp(Number(editValues.minExpYears) || 0, 0, 30),
       educationReq: editValues.educationReq,
       employmentType: editValues.employmentType,
+      workArrangement: editValues.workArrangement,
       location: editValues.location || undefined,
       closingDate: editValues.closingDate || undefined,
       requiredSkills: editSkills,
@@ -131,6 +133,7 @@ export function JobEditPage() {
         minExpYears: job.minExpYears,
         educationReq: job.educationReq,
         employmentType: job.employmentType,
+        workArrangement: job.workArrangement,
         location: job.location ?? undefined,
         closingDate: job.closingDate ?? undefined,
         requiredSkills: job.requiredSkills,
@@ -347,7 +350,7 @@ export function JobEditPage() {
                   disabled={
                     !editValues.title.trim() ||
                     editSkills.length === 0 ||
-                    (!!editValues.closingDate && editValues.closingDate < todayIsoDate())
+                    (!!editValues.closingDate && editValues.closingDate <= todayIsoDate())
                   }
                 >
                   Save changes

@@ -73,3 +73,11 @@ export function clamp(value: number, min: number, max: number): number {
 export function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
+
+// The backend rejects a closing date that isn't strictly in the future (today included), so
+// "tomorrow" — not "today" — is the earliest date the UI should ever let someone pick or submit.
+export function tomorrowIsoDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}

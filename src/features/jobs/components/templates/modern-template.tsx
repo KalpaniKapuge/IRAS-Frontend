@@ -1,4 +1,4 @@
-import { Briefcase, Building2, Calendar, CheckCircle2, GraduationCap, MapPin, Sparkles } from "lucide-react";
+import { Briefcase, Building2, Calendar, CheckCircle2, GraduationCap, Home, MapPin, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
@@ -27,6 +27,9 @@ export function ModernTemplate({ job, actionSlot }: JobTemplateProps) {
             </span>
             <span className="flex items-center gap-1.5">
               <Briefcase className="h-4 w-4" /> {titleCase(job.employmentType)}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Home className="h-4 w-4" /> {titleCase(job.workArrangement)}
             </span>
             {job.location && (
               <span className="flex items-center gap-1.5">

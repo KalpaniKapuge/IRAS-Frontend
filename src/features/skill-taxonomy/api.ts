@@ -19,6 +19,10 @@ export const skillTaxonomyApi = {
 
   create: (payload: CreateSkillRequest) => http.post<SkillDto>("/api/skills", payload).then((r) => r.data),
 
+  // Open to any signed-in user (candidate/employer), unlike `create` above — get-or-create
+  // by name, used by SkillPicker's "add this skill" affordance when a search finds nothing.
+  quickAdd: (skillName: string) => http.post<SkillDto>("/api/skills/quick-add", { skillName }).then((r) => r.data),
+
   update: (skillId: number, payload: UpdateSkillRequest) =>
     http.put(`/api/skills/${skillId}`, payload).then((r) => r.data),
 

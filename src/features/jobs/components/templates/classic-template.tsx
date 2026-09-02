@@ -1,4 +1,4 @@
-import { Briefcase, Building2, Calendar, GraduationCap, MapPin, Sparkles } from "lucide-react";
+import { Briefcase, Building2, Calendar, GraduationCap, Home, MapPin, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -42,6 +42,7 @@ export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
           </p>
           <FactRow icon={Sparkles} label="Seniority level" value={job.seniorityLevel} />
           <FactRow icon={Briefcase} label="Employment type" value={titleCase(job.employmentType)} />
+          <FactRow icon={Home} label="Work arrangement" value={titleCase(job.workArrangement)} />
           {job.location && <FactRow icon={MapPin} label="Location" value={job.location} />}
           <FactRow icon={GraduationCap} label="Minimum education" value={`${titleCase(job.educationReq)}+`} />
           {job.postedAt && <FactRow icon={Calendar} label="Date posted" value={formatDate(job.postedAt)} />}

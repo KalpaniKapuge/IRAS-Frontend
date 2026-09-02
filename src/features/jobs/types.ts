@@ -1,4 +1,4 @@
-import type { EducationLevel, EmploymentType, ImportanceLevel, JobStatus } from "@/types/enums";
+import type { EducationLevel, EmploymentType, ImportanceLevel, JobStatus, WorkArrangement } from "@/types/enums";
 
 export interface JobRequiredSkillDto {
   skillId: number;
@@ -23,6 +23,7 @@ export interface JobDto {
   minExpYears: number;
   educationReq: EducationLevel;
   employmentType: EmploymentType;
+  workArrangement: WorkArrangement;
   location: string | null;
   status: JobStatus;
   postedAt: string | null;
@@ -39,6 +40,7 @@ export interface JobSummaryDto {
   companyName: string | null;
   seniorityLevel: string;
   employmentType: EmploymentType;
+  workArrangement: WorkArrangement;
   location: string | null;
   status: JobStatus;
   postedAt: string | null;
@@ -54,6 +56,7 @@ export interface CreateJobRequest {
   minExpYears: number;
   educationReq: EducationLevel;
   employmentType: EmploymentType;
+  workArrangement: WorkArrangement;
   location?: string;
   closingDate?: string | null;
   requiredSkills: JobRequiredSkillDto[];
@@ -66,6 +69,7 @@ export interface UpdateJobRequest {
   minExpYears: number;
   educationReq: EducationLevel;
   employmentType: EmploymentType;
+  workArrangement: WorkArrangement;
   location?: string | null;
   closingDate?: string | null;
   requiredSkills: JobRequiredSkillDto[];
