@@ -143,7 +143,7 @@ export function JobEditPage() {
       if (!ok) return;
     }
     const ok = await publish(employerId, job.jobId);
-    if (ok) navigate(`/employer/jobs/${job.jobId}/applicants`);
+    if (ok) navigate(`/employer/jobs/${job.jobId}`, { replace: true });
   };
 
   const handleDelete = async () => {
@@ -219,7 +219,7 @@ export function JobEditPage() {
                   placeholder="No description yet — generate one above."
                 />
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveJd} loading={isMutating} disabled={!dirty || !jdDraft.trim()}>
+                  <Button onClick={handleSaveJd} loading={isMutating} disabled={!jdDraft.trim()}>
                     Save description
                   </Button>
                 </div>
@@ -257,7 +257,7 @@ export function JobEditPage() {
                     type="button"
                     variant="outline"
                     className="w-full gap-2"
-                    disabled={!templateKey}
+                    disabled={!templateKey || !jdDraft.trim()}
                     onClick={() => setIsPreviewOpen(true)}
                   >
                     <Eye className="h-4 w-4" /> Preview appearance
@@ -370,7 +370,15 @@ export function JobEditPage() {
             </DialogDescription>
           </DialogHeader>
           {templateKey && (
-            <PreviewTemplate job={{ ...job, templateKey }} actionSlot={<Button size="lg" disabled>Apply now</Button>} />
+            <PreviewTemplate
+              job={{
+                ...job,
+                generatedJd: jdDraft,
+                isAiGenerated: job.isAiGenerated && !dirty,
+                templateKey,
+              }}
+              actionSlot={<Button size="lg" disabled>Apply now</Button>}
+            />
           )}
         </DialogContent>
       </Dialog>
