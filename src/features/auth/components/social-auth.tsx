@@ -120,7 +120,7 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
                     : "Google sign-in is coming soon — please use your email for now.",
                 )
           }
-          className="h-12 w-full rounded-full"
+          className={`h-12 w-full rounded-full ${googleActive && ready ? "pointer-events-none" : ""}`}
         >
           <GoogleIcon />
           {action} with Google
@@ -132,9 +132,15 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
           // descendant makes Chrome/Edge actively block interaction with that descendant as
           // an accessibility safeguard (see the "Blocked aria-hidden..." console warning) —
           // that was silently eating every click on this overlay.
+          //
+          // z-10 + the fake button going pointer-events-none once ready (above) are both
+          // needed: without them, DevTools "select element" on the visible button resolves
+          // to the decorative <button> underneath, not this overlay/iframe — the overlay
+          // geometrically covers the button but was losing the actual hit-test, so clicks
+          // silently fell through to the do-nothing button beneath it.
           <div
             ref={overlayRef}
-            className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-0 ${
+            className={`absolute inset-0 z-10 flex items-center justify-center overflow-hidden rounded-full opacity-0 ${
               ready ? "" : "pointer-events-none"
             }`}
           />
