@@ -18,6 +18,10 @@ export function setUnauthorizedHandler(handler: () => void) {
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://localhost:7031",
   headers: { "Content-Type": "application/json" },
+  // Cap every request so a stalled backend / AI service surfaces as a real error the UI
+  // can show and retry, instead of a spinner that hangs forever. Generous enough for the
+  // slowest legitimate call (live job-recommendation scoring across all open jobs).
+  timeout: 45_000,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -37,10 +41,14 @@ apiClient.interceptors.response.use(
       onUnauthorized();
     }
 
+    const timedOut = error.code === "ECONNABORTED" || /timeout/i.test(error.message);
+
     const message =
       data?.message ??
       data?.title ??
-      (status === 0
+      (timedOut
+        ? "The server took too long to respond. Please try again."
+        : status === 0
         ? "Could not reach the server. Check your connection and try again."
         : status === 403
           ? "You don't have permission to do that."

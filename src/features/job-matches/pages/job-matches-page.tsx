@@ -1,29 +1,58 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Radar, Sparkles } from "lucide-react";
+import { AlertTriangle, Radar, RefreshCw, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBar } from "@/components/shared/score-bar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RowSkeletonList } from "@/components/shared/loading-state";
+import { CardSkeletonGrid } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ApiError } from "@/types/common";
 import { formatRelative } from "@/lib/format";
 import { formatScore } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
 import { jobMatchesApi } from "../api";
 import type { JobMatchDto, JobRecommendationDto } from "../types";
 
+type Async<T> = { data: T | null; error: string | null; loading: boolean };
+
+const initial = <T,>(): Async<T> => ({ data: null, error: null, loading: true });
+
+function errorMessage(err: unknown, fallback: string) {
+  return err instanceof ApiError ? err.message : fallback;
+}
+
 export function JobMatchesPage() {
   const candidateId = useAuthStore((s) => s.user!.userId);
-  const [matches, setMatches] = useState<JobMatchDto[] | null>(null);
-  const [recommended, setRecommended] = useState<JobRecommendationDto[] | null>(null);
+  const [matched, setMatched] = useState<Async<JobMatchDto[]>>(initial);
+  const [recommended, setRecommended] = useState<Async<JobRecommendationDto[]>>(initial);
+
+  const loadMatched = useCallback(() => {
+    setMatched((s) => ({ ...s, loading: true, error: null }));
+    jobMatchesApi
+      .getMine(candidateId)
+      .then((data) => setMatched({ data, error: null, loading: false }))
+      .catch((err) =>
+        setMatched({ data: null, loading: false, error: errorMessage(err, "Couldn't load your matches.") }),
+      );
+  }, [candidateId]);
+
+  const loadRecommended = useCallback(() => {
+    setRecommended((s) => ({ ...s, loading: true, error: null }));
+    jobMatchesApi
+      .getRecommended(candidateId)
+      .then((data) => setRecommended({ data, error: null, loading: false }))
+      .catch((err) =>
+        setRecommended({ data: null, loading: false, error: errorMessage(err, "Couldn't load recommendations.") }),
+      );
+  }, [candidateId]);
 
   useEffect(() => {
-    jobMatchesApi.getMine(candidateId).then(setMatches);
-    jobMatchesApi.getRecommended(candidateId).then(setRecommended);
-  }, [candidateId]);
+    loadMatched();
+    loadRecommended();
+  }, [loadMatched, loadRecommended]);
 
   return (
     <div className="space-y-6">
@@ -39,9 +68,20 @@ export function JobMatchesPage() {
         </TabsList>
 
         <TabsContent value="recommended">
-          {recommended === null ? (
-            <RowSkeletonList count={4} />
-          ) : recommended.length === 0 ? (
+          {recommended.loading ? (
+            <CardSkeletonGrid count={6} />
+          ) : recommended.error ? (
+            <EmptyState
+              icon={AlertTriangle}
+              title="Couldn't load recommendations"
+              description={recommended.error}
+              action={
+                <Button variant="outline" size="sm" onClick={loadRecommended}>
+                  <RefreshCw className="h-4 w-4" /> Try again
+                </Button>
+              }
+            />
+          ) : (recommended.data ?? []).length === 0 ? (
             <EmptyState
               icon={Sparkles}
               title="No recommendations yet"
@@ -49,7 +89,7 @@ export function JobMatchesPage() {
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {recommended.map((rec) => (
+              {recommended.data!.map((rec) => (
                 <Card key={rec.jobId}>
                   <CardContent className="space-y-4 p-5">
                     <div>
@@ -79,17 +119,28 @@ export function JobMatchesPage() {
         </TabsContent>
 
         <TabsContent value="matched">
-          {matches === null ? (
-            <RowSkeletonList count={4} />
-          ) : matches.length === 0 ? (
+          {matched.loading ? (
+            <CardSkeletonGrid count={6} />
+          ) : matched.error ? (
+            <EmptyState
+              icon={AlertTriangle}
+              title="Couldn't load your matches"
+              description={matched.error}
+              action={
+                <Button variant="outline" size="sm" onClick={loadMatched}>
+                  <RefreshCw className="h-4 w-4" /> Try again
+                </Button>
+              }
+            />
+          ) : (matched.data ?? []).length === 0 ? (
             <EmptyState
               icon={Radar}
               title="No matches yet"
-              description="Make sure automated matching is enabled in your profile and you have a parsed primary resume."
+              description="Auto-matches appear when an employer publishes a job that fits your profile. Make sure automated matching is on in your profile and you have a parsed primary resume."
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {matches.map((match) => (
+              {matched.data!.map((match) => (
                 <Card key={match.matchId}>
                   <CardContent className="space-y-4 p-5">
                     <div>
