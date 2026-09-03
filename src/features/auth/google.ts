@@ -56,8 +56,11 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
   if (scriptPromise) return scriptPromise;
 
   scriptPromise = new Promise<GoogleAccountsId>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SRC}"]`);
-    const script = existing ?? document.createElement("script");
+    // Always create a fresh <script> tag rather than reusing one already in the DOM — an
+    // element left over from a prior failed load would never re-fire "load"/"error" just
+    // because we re-attached listeners to it (its src hasn't changed), so a retry after a
+    // transient failure would hang forever instead of actually retrying.
+    const script = document.createElement("script");
     script.src = GIS_SRC;
     script.async = true;
     script.defer = true;
@@ -67,9 +70,10 @@ export function loadGoogleIdentity(): Promise<GoogleAccountsId> {
     });
     script.addEventListener("error", () => {
       scriptPromise = null;
+      script.remove();
       reject(new Error("Could not load Google Identity Services."));
     });
-    if (!existing) document.head.appendChild(script);
+    document.head.appendChild(script);
   });
 
   return scriptPromise;

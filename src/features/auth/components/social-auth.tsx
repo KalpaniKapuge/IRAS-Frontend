@@ -49,6 +49,18 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
   const [loadFailed, setLoadFailed] = useState(false);
   const [ready, setReady] = useState(false);
 
+  // The login/register pages recreate onGoogleCredential more often than the identity of
+  // "what to do with the token" actually changes (their own useCallback depends on
+  // react-router's location.state, which isn't as stable as it looks). Reading it through a
+  // ref keeps this effect from tearing down and re-running Google's full initialize/render
+  // sequence on every one of those — that double-init was exactly the
+  // "google.accounts.id.initialize() is called multiple times" race that could leave the
+  // invisible overlay button empty and unclickable.
+  const credentialRef = useRef(onGoogleCredential);
+  useEffect(() => {
+    credentialRef.current = onGoogleCredential;
+  }, [onGoogleCredential]);
+
   useEffect(() => {
     if (!googleSignInEnabled) return;
     let cancelled = false;
@@ -59,7 +71,7 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
         id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => {
-            if (response?.credential) void onGoogleCredential(response.credential);
+            if (response?.credential) void credentialRef.current(response.credential);
           },
           cancel_on_tap_outside: true,
         });
@@ -82,7 +94,7 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
     return () => {
       cancelled = true;
     };
-  }, [action, onGoogleCredential]);
+  }, [action]);
 
   const googleActive = googleSignInEnabled && !loadFailed;
 
