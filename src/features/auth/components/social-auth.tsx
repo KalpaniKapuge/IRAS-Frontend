@@ -38,14 +38,15 @@ interface SocialAuthProps {
 
 // Social sign-in row + "or … with email" divider, shared by the login and register pages.
 //
-// We always show our own pill button (matches the form's styling, clean transparent "G").
-// When VITE_GOOGLE_CLIENT_ID is set, Google's real Identity Services button is rendered
-// invisibly on top of it: the user sees our button, the click lands on Google's, which
-// runs the account-chooser and returns the ID token. This is what keeps the look ours
-// while the auth stays the officially supported flow. With no client ID (or if the GIS
-// script fails to load) our button just shows an honest notice.
+// Renders Google's own Identity Services button directly and visibly (outline/pill theme,
+// chosen to match the rest of the form as closely as Google's widget allows) rather than
+// layering it invisibly on top of a separate custom-styled button — that overlay trick
+// depends on the two elements staying perfectly aligned and the overlay's hit-testing
+// working in every browser, and was a real source of "renders but can't be clicked" bugs.
+// A plain custom button with a toast is shown instead when there's no client ID configured
+// or the Google script fails to load.
 export function SocialAuth({ action, onGoogleCredential, note, busy = false }: SocialAuthProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -67,7 +68,7 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
 
     loadGoogleIdentity()
       .then((id) => {
-        if (cancelled || !overlayRef.current) return;
+        if (cancelled || !containerRef.current) return;
         id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => {
@@ -75,15 +76,15 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
           },
           cancel_on_tap_outside: true,
         });
-        overlayRef.current.innerHTML = "";
-        id.renderButton(overlayRef.current, {
+        containerRef.current.innerHTML = "";
+        id.renderButton(containerRef.current, {
           type: "standard",
           theme: "outline",
           size: "large",
           shape: "pill",
           text: action.toLowerCase().startsWith("sign up") ? "signup_with" : "signin_with",
           logo_alignment: "center",
-          width: Math.min(overlayRef.current.offsetWidth || 384, 400),
+          width: Math.min(containerRef.current.offsetWidth || 384, 400),
         });
         setReady(true);
       })
@@ -100,39 +101,42 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
 
   return (
     <div className="space-y-4">
-      <div className="relative">
+      {googleActive ? (
+        // Fixed height matches the fallback button below so there's no layout jump while
+        // Google's script is still loading — the container starts empty and ready=false
+        // hides it, then Google fills it in and it fades into view.
+        <div className="relative h-12">
+          {!ready && (
+            <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-full border border-border text-sm text-muted-foreground">
+              <GoogleIcon />
+              {action} with Google
+            </div>
+          )}
+          <div
+            ref={containerRef}
+            className={`flex h-12 items-center justify-center overflow-hidden rounded-full transition-opacity ${
+              ready ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </div>
+      ) : (
         <Button
           type="button"
           variant="outline"
           disabled={busy}
-          // When Google's invisible button is mounted it sits on top and takes the click;
-          // this handler only fires in the fallback (no client ID / script failed) or in
-          // the brief moment before GIS finishes loading.
           onClick={() =>
-            googleActive
-              ? toast.info("Connecting to Google…")
-              : toast.info(
-                  googleSignInEnabled
-                    ? "Google sign-in is temporarily unavailable — please use your email."
-                    : "Google sign-in is coming soon — please use your email for now.",
-                )
+            toast.info(
+              googleSignInEnabled
+                ? "Google sign-in is temporarily unavailable — please use your email."
+                : "Google sign-in is coming soon — please use your email for now.",
+            )
           }
           className="h-12 w-full rounded-full"
         >
           <GoogleIcon />
           {action} with Google
         </Button>
-
-        {googleActive && (
-          <div
-            ref={overlayRef}
-            aria-hidden="true"
-            className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-0 ${
-              ready ? "" : "pointer-events-none"
-            }`}
-          />
-        )}
-      </div>
+      )}
 
       {note && <p className="text-center text-xs text-muted-foreground">{note}</p>}
 
