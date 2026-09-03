@@ -43,8 +43,17 @@ apiClient.interceptors.response.use(
 
     const timedOut = error.code === "ECONNABORTED" || /timeout/i.test(error.message);
 
+    // ASP.NET Core's automatic model validation (e.g. a [StringLength] violation) returns a
+    // ValidationProblemDetails with a generic title ("One or more validation errors
+    // occurred") and the actual per-field reasons in `errors` — surface those instead of
+    // the useless generic title, everywhere in the app, not just for this one field.
+    const fieldErrorSummary = data?.errors && Object.keys(data.errors).length > 0
+      ? Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(" ")}`).join(" — ")
+      : undefined;
+
     const message =
       data?.message ??
+      fieldErrorSummary ??
       data?.title ??
       (timedOut
         ? "The server took too long to respond. Please try again."

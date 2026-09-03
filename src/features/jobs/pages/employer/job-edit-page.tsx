@@ -193,9 +193,13 @@ export function JobEditPage() {
                 <Textarea
                   rows={3}
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(e) => setNotes(e.target.value.slice(0, 2000))}
+                  maxLength={2000}
                   placeholder="e.g. Team of 6 engineers, fintech product, hybrid 2 days/week in office"
                 />
+                <p className={`text-right text-xs ${notes.length > 1900 ? "text-warning" : "text-muted-foreground"}`}>
+                  {notes.length}/2000
+                </p>
                 <Button onClick={handleGenerate} loading={isGeneratingJd} variant="secondary">
                   <Sparkles className="h-4 w-4" /> {job.generatedJd ? "Regenerate description" : "Generate description"}
                 </Button>
