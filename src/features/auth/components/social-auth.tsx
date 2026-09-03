@@ -127,9 +127,13 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
         </Button>
 
         {googleActive && (
+          // No aria-hidden here — this wraps Google's real, focusable, interactive iframe
+          // button, not decorative content. aria-hidden on a container with a focusable
+          // descendant makes Chrome/Edge actively block interaction with that descendant as
+          // an accessibility safeguard (see the "Blocked aria-hidden..." console warning) —
+          // that was silently eating every click on this overlay.
           <div
             ref={overlayRef}
-            aria-hidden="true"
             className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-0 ${
               ready ? "" : "pointer-events-none"
             }`}
