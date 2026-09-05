@@ -38,27 +38,29 @@ interface SocialAuthProps {
 
 // Social sign-in row + "or … with email" divider, shared by the login and register pages.
 //
-// We always show our own pill button (matches the form's styling, clean transparent "G").
-// Google's real Identity Services button is rendered invisibly on top of it: the user sees
-// our button, the click lands on Google's, which runs the account-chooser and returns the
-// ID token. This depends on two things that previously weren't true and caused a real
-// "renders but can't be clicked" bug: the effect that sets it up must not tear down and
-// re-run on every parent re-render (see credentialRef below), and a failed script load must
-// not leave a dead <script> tag behind that silently blocks any retry (see google.ts). With
-// no client ID (or if the script genuinely fails to load) our button just shows an honest
-// notice instead.
+// Google's real button renders directly and visibly here — no overlay trick. An earlier
+// version showed our own custom-styled decoy button and stacked Google's real, invisible
+// button on top of it via absolute positioning + pointer-events juggling, purely to get pixel-
+// perfect styling. That approach broke in two different ways during development (a
+// double-init race that left the overlay empty, then an aria-hidden container silently
+// blocking all interaction with it — Chrome/Edge's accessibility safeguard against exactly
+// that pattern), and a third variant of the same "renders but can't be clicked, no console
+// error" failure showed up after hosting, reproducible only in production. That is three
+// separate bugs from one technique, all in the same family: two visually-identical elements
+// whose stacking/pointer-events have to stay in perfect sync, which some browser/viewport/
+// environment combination will eventually desync. Rendering Google's own button directly
+// removes the whole bug class — there is no second element for a click to miss or fall
+// through to.
 export function SocialAuth({ action, onGoogleCredential, note, busy = false }: SocialAuthProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [ready, setReady] = useState(false);
 
-  // The login/register pages recreate onGoogleCredential more often than the identity of
-  // "what to do with the token" actually changes (their own useCallback depends on
-  // react-router's location.state, which isn't as stable as it looks). Reading it through a
-  // ref keeps this effect from tearing down and re-running Google's full initialize/render
-  // sequence on every one of those — that double-init was exactly the
-  // "google.accounts.id.initialize() is called multiple times" race that could leave the
-  // invisible overlay button empty and unclickable.
+  // Read through a ref for the same reason the previous version did: the login/register pages
+  // recreate onGoogleCredential more often than "what to do with the token" actually changes
+  // (their own useCallback depends on react-router's location.state, which isn't as stable as
+  // it looks), and re-running initialize()/renderButton() on every one of those re-renders is
+  // exactly the double-init race that caused the first version of this bug.
   const credentialRef = useRef(onGoogleCredential);
   useEffect(() => {
     credentialRef.current = onGoogleCredential;
@@ -70,7 +72,7 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
 
     loadGoogleIdentity()
       .then((id) => {
-        if (cancelled || !overlayRef.current) return;
+        if (cancelled || !containerRef.current) return;
         id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => {
@@ -78,15 +80,15 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
           },
           cancel_on_tap_outside: true,
         });
-        overlayRef.current.innerHTML = "";
-        id.renderButton(overlayRef.current, {
+        containerRef.current.innerHTML = "";
+        id.renderButton(containerRef.current, {
           type: "standard",
           theme: "outline",
           size: "large",
           shape: "pill",
           text: action.toLowerCase().startsWith("sign up") ? "signup_with" : "signin_with",
           logo_alignment: "center",
-          width: Math.min(overlayRef.current.offsetWidth || 384, 400),
+          width: Math.min(containerRef.current.offsetWidth || 384, 400),
         });
         setReady(true);
       })
@@ -103,49 +105,42 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
 
   return (
     <div className="space-y-4">
-      <div className="relative">
+      {googleActive ? (
+        <div className="relative flex h-12 w-full items-center justify-center">
+          {/* Placeholder shown only until Google's script finishes loading — keeps the
+              layout stable and honestly communicates "loading" instead of a button that
+              looks clickable but isn't wired up yet. */}
+          {!ready && (
+            <Button type="button" variant="outline" disabled className="h-12 w-full rounded-full">
+              <GoogleIcon />
+              {action} with Google…
+            </Button>
+          )}
+          <div
+            ref={containerRef}
+            className={`flex items-center justify-center ${ready ? "" : "hidden"} ${
+              busy ? "pointer-events-none opacity-50" : ""
+            }`}
+          />
+        </div>
+      ) : (
         <Button
           type="button"
           variant="outline"
           disabled={busy}
-          // When Google's invisible button is mounted it sits on top and takes the click;
-          // this handler only fires in the fallback (no client ID / script failed) or in
-          // the brief moment before GIS finishes loading.
           onClick={() =>
-            googleActive
-              ? toast.info("Connecting to Google…")
-              : toast.info(
-                  googleSignInEnabled
-                    ? "Google sign-in is temporarily unavailable — please use your email."
-                    : "Google sign-in is coming soon — please use your email for now.",
-                )
+            toast.info(
+              googleSignInEnabled
+                ? "Google sign-in is temporarily unavailable — please use your email."
+                : "Google sign-in is coming soon — please use your email for now.",
+            )
           }
-          className={`h-12 w-full rounded-full ${googleActive && ready ? "pointer-events-none" : ""}`}
+          className="h-12 w-full rounded-full"
         >
           <GoogleIcon />
           {action} with Google
         </Button>
-
-        {googleActive && (
-          // No aria-hidden here — this wraps Google's real, focusable, interactive iframe
-          // button, not decorative content. aria-hidden on a container with a focusable
-          // descendant makes Chrome/Edge actively block interaction with that descendant as
-          // an accessibility safeguard (see the "Blocked aria-hidden..." console warning) —
-          // that was silently eating every click on this overlay.
-          //
-          // z-10 + the fake button going pointer-events-none once ready (above) are both
-          // needed: without them, DevTools "select element" on the visible button resolves
-          // to the decorative <button> underneath, not this overlay/iframe — the overlay
-          // geometrically covers the button but was losing the actual hit-test, so clicks
-          // silently fell through to the do-nothing button beneath it.
-          <div
-            ref={overlayRef}
-            className={`absolute inset-0 z-10 flex items-center justify-center overflow-hidden rounded-full opacity-0 ${
-              ready ? "" : "pointer-events-none"
-            }`}
-          />
-        )}
-      </div>
+      )}
 
       {note && <p className="text-center text-xs text-muted-foreground">{note}</p>}
 
