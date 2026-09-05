@@ -118,9 +118,13 @@ export function SocialAuth({ action, onGoogleCredential, note, busy = false }: S
           )}
           <div
             ref={containerRef}
-            className={`flex items-center justify-center ${ready ? "" : "hidden"} ${
-              busy ? "pointer-events-none opacity-50" : ""
-            }`}
+            // overflow-hidden + rounded-full clip whatever Google paints inside its iframe
+            // (the plain button, or the wider "signed in as ..." variant it renders when it
+            // detects an existing Google session in the browser) to a pill shape from the
+            // outside, without needing to reach into cross-origin content we can't restyle.
+            className={`flex w-full items-center justify-center overflow-hidden rounded-full ${
+              ready ? "" : "hidden"
+            } ${busy ? "pointer-events-none opacity-50" : ""}`}
           />
         </div>
       ) : (
