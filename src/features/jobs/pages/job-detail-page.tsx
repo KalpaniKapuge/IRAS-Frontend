@@ -45,8 +45,13 @@ export function JobDetailPage() {
 
   const needsAssessment = job.requireAssessment && !assessmentStatus?.isCompleted;
   const actionSlot = needsAssessment ? (
-    <Button size="lg" className="gap-2" onClick={() => navigate(`/candidate/jobs/${job.jobId}/assessment`)}>
-      <ClipboardList className="h-4 w-4" /> Take skill assessment to apply
+    <Button
+      size="lg"
+      className="h-auto min-h-12 w-full max-w-sm whitespace-normal border-2 border-primary-foreground/70 bg-success px-5 py-3 text-base font-bold leading-tight text-success-foreground shadow-elevated ring-2 ring-success/25 hover:bg-success/90 sm:w-auto"
+      onClick={() => navigate(`/candidate/jobs/${job.jobId}/assessment`)}
+    >
+      <ClipboardList className="h-5 w-5" />
+      <span>Take skill assessment to apply</span>
     </Button>
   ) : (
     <ApplyDialog jobId={job.jobId} jobTitle={job.title} />

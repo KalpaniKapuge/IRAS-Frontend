@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, ClipboardList, Timer } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ClipboardList, RotateCcw, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
-import { cn, formatScore } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useJobsStore } from "@/features/jobs/store";
 import { useAssessmentsStore } from "../store";
 import { AssessmentQuestionCard } from "../components/assessment-question-card";
@@ -28,14 +28,25 @@ export function JobAssessmentPage() {
   const numericJobId = Number(jobId);
 
   const { currentJob, isLoadingDetail, loadJob, clearCurrentJob } = useJobsStore();
-  const { status, attempt, result, isLoading, isStarting, isSubmitting, loadStatus, startAssessment, submitAssessment, reset } =
-    useAssessmentsStore();
+  const {
+    status,
+    attempt,
+    result,
+    isLoading,
+    isStarting,
+    isSubmitting,
+    loadStatus,
+    startAssessment,
+    submitAssessment,
+    clearAttempt,
+    reset,
+  } = useAssessmentsStore();
 
   const [answers, setAnswers] = useState<Record<number, AnswerState>>({});
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [timedOutIncomplete, setTimedOutIncomplete] = useState(false);
   const answersRef = useRef(answers);
   answersRef.current = answers;
-  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -57,7 +68,7 @@ export function JobAssessmentPage() {
 
   const handleStart = async () => {
     setAnswers({});
-    autoSubmittedRef.current = false;
+    setTimedOutIncomplete(false);
     await startAssessment(numericJobId);
   };
 
@@ -65,8 +76,8 @@ export function JobAssessmentPage() {
     await submitAssessment(numericJobId, buildSubmitPayload());
   };
 
-  // Countdown, driven by the server-computed deadline (survives reload — a resumed attempt
-  // returns the same deadline computed from its original StartedAt, not a fresh timer).
+  // Countdown is driven by the server-computed deadline. Expired incomplete
+  // attempts are not auto-submitted; the candidate can start again.
   useEffect(() => {
     if (!attempt || result) {
       setRemainingSeconds(null);
@@ -76,9 +87,10 @@ export function JobAssessmentPage() {
     const tick = () => {
       const secondsLeft = Math.max(0, Math.floor((new Date(attempt.deadlineAt).getTime() - Date.now()) / 1000));
       setRemainingSeconds(secondsLeft);
-      if (secondsLeft === 0 && !autoSubmittedRef.current && !isSubmitting) {
-        autoSubmittedRef.current = true;
-        submitAssessment(numericJobId, buildSubmitPayload());
+      if (secondsLeft === 0) {
+        setAnswers({});
+        setTimedOutIncomplete(true);
+        clearAttempt();
       }
     };
 
@@ -113,13 +125,13 @@ export function JobAssessmentPage() {
         <EmptyState
           icon={ClipboardList}
           title="No assessment required"
-          description="This job does not require a skill assessment — you can apply directly."
+          description="This job does not require a skill assessment. You can apply directly."
         />
       </div>
     );
   }
 
-  const finalResult = result ?? (status?.isCompleted ? { score: status.score ?? 0, correctCount: 0, answeredCount: 0, totalQuestions: 0 } : null);
+  const finalResult = result ?? (status?.isCompleted ? { correctCount: 0, answeredCount: 0, totalQuestions: 0 } : null);
 
   if (finalResult) {
     return (
@@ -131,12 +143,11 @@ export function JobAssessmentPage() {
             <CardTitle>Assessment completed</CardTitle>
             <CardDescription>
               {result
-                ? `You answered ${result.answeredCount} of ${result.totalQuestions} questions, ${result.correctCount} scored well.`
+                ? `You answered ${result.answeredCount} of ${result.totalQuestions} questions. Your result was saved for the employer.`
                 : "You've already completed this assessment."}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <p className="text-4xl font-semibold">{formatScore(finalResult.score)}%</p>
             <Button onClick={() => navigate(`/candidate/jobs/${numericJobId}`)}>Continue to apply</Button>
           </CardContent>
         </Card>
@@ -156,9 +167,9 @@ export function JobAssessmentPage() {
         {backButton}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">Skill Assessment — {currentJob.title}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Skill Assessment - {currentJob.title}</h1>
             <p className="text-sm text-muted-foreground">
-              Answer as many questions as you can before time runs out. You get one attempt for this job.
+              Complete every question before the timer ends. If time runs out before you finish, this attempt is not submitted.
             </p>
           </div>
           {remainingSeconds != null && (
@@ -192,7 +203,9 @@ export function JobAssessmentPage() {
         </div>
 
         <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4">
-          <p className="text-sm text-muted-foreground">{answeredCount} of {attempt.questions.length} answered</p>
+          <p className="text-sm text-muted-foreground">
+            {answeredCount} of {attempt.questions.length} answered
+          </p>
           <Button onClick={handleSubmit} loading={isSubmitting} disabled={!allAnswered}>
             Submit assessment
           </Button>
@@ -206,17 +219,21 @@ export function JobAssessmentPage() {
       {backButton}
       <Card>
         <CardHeader className="items-center text-center">
-          <ClipboardList className="h-10 w-10 text-primary" />
-          <CardTitle>Skill assessment required</CardTitle>
+          {timedOutIncomplete ? (
+            <RotateCcw className="h-10 w-10 text-warning" />
+          ) : (
+            <ClipboardList className="h-10 w-10 text-primary" />
+          )}
+          <CardTitle>{timedOutIncomplete ? "Try the assessment again" : "Skill assessment required"}</CardTitle>
           <CardDescription>
-            Complete a short quiz (multiple-choice and written/code questions) based on this job's required skills
-            before you can apply for {currentJob.title}. You get one attempt and a time limit of about one minute per
-            question — once it runs out, whatever you've answered is scored automatically.
+            {timedOutIncomplete
+              ? "Time ended before this assessment was submitted, so nothing was saved. Start again when you're ready."
+              : `Complete a short quiz (multiple-choice and written/code questions) based on this job's required skills before you can apply for ${currentJob.title}. Finish every question before the timer ends to submit your assessment.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
           <Button onClick={handleStart} loading={isStarting}>
-            {status?.hasAttempted ? "Resume assessment" : "Start assessment"}
+            {timedOutIncomplete ? "Start again" : status?.hasAttempted ? "Resume assessment" : "Start assessment"}
           </Button>
         </CardContent>
       </Card>

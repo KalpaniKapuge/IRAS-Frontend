@@ -20,6 +20,7 @@ interface AssessmentsState {
   loadStatus: (jobId: number) => Promise<void>;
   startAssessment: (jobId: number) => Promise<void>;
   submitAssessment: (jobId: number, answers: SubmitAssessmentAnswer[]) => Promise<boolean>;
+  clearAttempt: () => void;
   reset: () => void;
 }
 
@@ -50,7 +51,7 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
     set({ isStarting: true });
     try {
       const attempt = await assessmentsApi.start(jobId);
-      set({ attempt, isStarting: false });
+      set({ attempt, result: null, isStarting: false });
     } catch (err) {
       set({ isStarting: false });
       handle(err, "Failed to start the assessment.");
@@ -70,5 +71,6 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
     }
   },
 
+  clearAttempt: () => set({ attempt: null }),
   reset: () => set({ status: null, attempt: null, result: null }),
 }));
