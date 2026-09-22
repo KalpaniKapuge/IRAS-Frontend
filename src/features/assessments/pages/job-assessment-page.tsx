@@ -46,6 +46,7 @@ export function JobAssessmentPage() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [timedOutIncomplete, setTimedOutIncomplete] = useState(false);
   const answersRef = useRef(answers);
+  const timeoutHandledRef = useRef(false);
   answersRef.current = answers;
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function JobAssessmentPage() {
   const handleStart = async () => {
     setAnswers({});
     setTimedOutIncomplete(false);
+    timeoutHandledRef.current = false;
     await startAssessment(numericJobId);
   };
 
@@ -76,18 +78,33 @@ export function JobAssessmentPage() {
     await submitAssessment(numericJobId, buildSubmitPayload());
   };
 
-  // Countdown is driven by the server-computed deadline. Expired incomplete
-  // attempts are not auto-submitted; the candidate can start again.
+  const isQuestionAnswered = (questionId: number) => {
+    const answer = answersRef.current[questionId];
+    return answer?.selectedOptionIndex != null || Boolean(answer?.freeTextAnswer?.trim());
+  };
+
+  // Countdown is driven by the server-computed deadline. If every question is
+  // answered when time ends, submit it. Otherwise do not submit and allow retry.
   useEffect(() => {
     if (!attempt || result) {
       setRemainingSeconds(null);
+      timeoutHandledRef.current = false;
       return;
     }
 
     const tick = () => {
       const secondsLeft = Math.max(0, Math.floor((new Date(attempt.deadlineAt).getTime() - Date.now()) / 1000));
       setRemainingSeconds(secondsLeft);
-      if (secondsLeft === 0) {
+
+      if (secondsLeft === 0 && !timeoutHandledRef.current) {
+        timeoutHandledRef.current = true;
+        const allQuestionsAnswered = attempt.questions.every((question) => isQuestionAnswered(question.questionId));
+
+        if (allQuestionsAnswered) {
+          submitAssessment(numericJobId, buildSubmitPayload());
+          return;
+        }
+
         setAnswers({});
         setTimedOutIncomplete(true);
         clearAttempt();
@@ -142,9 +159,7 @@ export function JobAssessmentPage() {
             <CheckCircle2 className="h-10 w-10 text-success" />
             <CardTitle>Assessment completed</CardTitle>
             <CardDescription>
-              {result
-                ? `You answered ${result.answeredCount} of ${result.totalQuestions} questions. Your result was saved for the employer.`
-                : "You've already completed this assessment."}
+              {result ? "Your assessment was submitted successfully." : "You've already completed this assessment."}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
