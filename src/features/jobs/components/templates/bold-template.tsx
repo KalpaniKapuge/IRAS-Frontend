@@ -15,10 +15,10 @@ import type { JobTemplateProps } from "./types";
 const FACT_TINTS = [
   "bg-primary/10 text-primary",
   "bg-chart-2/15 text-chart-2",
-  "bg-chart-5/15 text-chart-5",
+  "bg-primary/15 text-primary",
   "bg-info/15 text-info",
-  "bg-success/15 text-success",
-  "bg-chart-3/15 text-chart-3",
+  "bg-warning/15 text-warning",
+  "bg-muted text-muted-foreground",
 ];
 
 function FactChip({
@@ -66,10 +66,10 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
-        <div className="bg-gradient-to-br from-primary via-chart-2 to-chart-5 px-8 py-10 text-primary-foreground sm:px-12 sm:py-14">
+        <div className="bg-gradient-to-br from-primary via-info to-chart-2 px-8 py-10 text-primary-foreground sm:px-12 sm:py-14">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
             <div className="min-w-0">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-black/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
                 <Building2 className="h-3.5 w-3.5" /> {job.companyName ?? "Confidential"}
               </p>
               <h1 className="mt-4 max-w-3xl text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl">
@@ -99,7 +99,7 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
         </Card>
 
         <div className="space-y-4">
-          <Card className="overflow-hidden border-none bg-gradient-to-br from-primary to-chart-5 shadow-elevated">
+          <Card className="overflow-hidden border-none bg-gradient-to-br from-primary to-info shadow-elevated">
             <CardContent className="p-6 text-primary-foreground">
               <p className="text-6xl font-black leading-none">{mustHave.length}</p>
               <p className="mt-2 text-sm font-bold uppercase tracking-wide opacity-95">

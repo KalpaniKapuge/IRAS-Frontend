@@ -72,14 +72,14 @@ export function JobsBrowsePage() {
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-border/80 bg-background/70 px-3 py-2.5">
-              <MapPin className="h-4 w-4 shrink-0 text-success" />
+              <MapPin className="h-4 w-4 shrink-0 text-primary" />
               <div>
                 <p className="text-base font-bold leading-none">{stats.locations}</p>
                 <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Locations</p>
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-border/80 bg-background/70 px-3 py-2.5">
-              <Sparkles className="h-4 w-4 shrink-0 text-warning" />
+              <Sparkles className="h-4 w-4 shrink-0 text-info" />
               <div>
                 <p className="text-base font-bold leading-none">{stats.skillCount}</p>
                 <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">Skill signals</p>

@@ -10,13 +10,13 @@ export function ModernTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
-        <div className="bg-gradient-to-br from-primary to-chart-2 px-6 py-8 text-primary-foreground sm:px-8 sm:py-10">
+        <div className="bg-gradient-to-br from-primary via-info to-chart-2 px-6 py-8 text-primary-foreground sm:px-8 sm:py-10">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
             <div>
-              <p className="flex items-center gap-1.5 text-sm font-medium text-primary-foreground/80">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-foreground">
                 <Building2 className="h-4 w-4" /> {job.companyName ?? "Confidential"}
               </p>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight">{job.title}</h1>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight">{job.title}</h1>
             </div>
             {actionSlot}
           </div>

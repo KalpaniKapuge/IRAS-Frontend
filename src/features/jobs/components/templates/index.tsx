@@ -13,8 +13,8 @@ export const JOB_TEMPLATES: Record<JobTemplateKey, ComponentType<JobTemplateProp
 
 export const TEMPLATE_ACCENT: Record<JobTemplateKey, { border: string; bar: string }> = {
   modern: { border: "border-t-primary", bar: "bg-gradient-to-r from-primary to-chart-2" },
-  classic: { border: "border-t-muted-foreground/40", bar: "bg-muted-foreground/40" },
-  bold: { border: "border-t-chart-3", bar: "bg-chart-3" },
+  classic: { border: "border-t-primary/50", bar: "bg-primary/50" },
+  bold: { border: "border-t-info", bar: "bg-gradient-to-r from-primary to-info" },
 };
 
 export type { JobTemplateProps } from "./types";

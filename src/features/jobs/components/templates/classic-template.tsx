@@ -23,8 +23,8 @@ function FactRow({ icon: Icon, label, value }: { icon: typeof Briefcase; label: 
 export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <div className="space-y-4 rounded-t-xl border-b-4 border-chart-3 bg-gradient-to-b from-chart-3/10 to-transparent px-6 pb-6 pt-8 text-center font-serif">
-        <p className="flex items-center justify-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-chart-3">
+      <div className="space-y-4 rounded-xl border border-border bg-gradient-to-b from-primary/10 to-card px-6 pb-6 pt-8 text-center font-serif shadow-soft">
+        <p className="flex items-center justify-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-primary">
           <Building2 className="h-4 w-4" /> {job.companyName ?? "Confidential"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-foreground">{job.title}</h1>
@@ -37,7 +37,7 @@ export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
 
       <Card className="border-border">
         <CardContent className="p-6">
-          <p className="mb-1 font-serif text-sm font-semibold uppercase tracking-wide text-chart-3">
+          <p className="mb-1 font-serif text-sm font-semibold uppercase tracking-wide text-primary">
             Position Summary
           </p>
           <FactRow icon={Sparkles} label="Seniority level" value={job.seniorityLevel} />
@@ -50,14 +50,14 @@ export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
       </Card>
 
       <div>
-        <p className="mb-3 font-serif text-sm font-semibold uppercase tracking-wide text-chart-3">
+        <p className="mb-3 font-serif text-sm font-semibold uppercase tracking-wide text-primary">
           Full Description
         </p>
         <JobDescription description={job.generatedJd} jobTitle={job.title} />
       </div>
 
       <div>
-        <p className="mb-3 font-serif text-sm font-semibold uppercase tracking-wide text-chart-3">
+        <p className="mb-3 font-serif text-sm font-semibold uppercase tracking-wide text-primary">
           Requirements
         </p>
         <Separator className="mb-3" />

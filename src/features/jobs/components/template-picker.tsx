@@ -6,7 +6,7 @@ const TEMPLATE_META: Record<JobTemplateKey, { label: string; description: string
   modern: {
     label: "Modern",
     description: "Gradient hero header with icon-led highlights.",
-    swatch: "bg-gradient-to-br from-primary to-chart-2",
+    swatch: "bg-gradient-to-br from-primary via-info to-chart-2",
   },
   classic: {
     label: "Classic",
@@ -16,7 +16,7 @@ const TEMPLATE_META: Record<JobTemplateKey, { label: string; description: string
   bold: {
     label: "Bold",
     description: "Large typography with strong color accents.",
-    swatch: "bg-chart-3",
+    swatch: "bg-gradient-to-br from-primary to-info",
   },
 };
 
