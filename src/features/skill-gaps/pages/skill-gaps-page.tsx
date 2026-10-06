@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle2, Sparkles, Target, X } from "lucide-react";
+import { BookOpen, Sparkles, Target, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,10 @@ export function SkillGapsPage() {
   const maxOccurrences = Math.max(1, ...(summary?.map((s) => s.totalOccurrences) ?? [1]));
   const resourcesForSkill = (skillId: number) => resources.filter((r) => r.skillId === skillId);
   const targetStatus = (skillId: number) => targetSkills?.find((t) => t.skillId === skillId)?.status;
-  const planForSkill = (skillId: number) => plans?.find((p) => p.skillId === skillId);
+  const planForSkill = (skillId: number, jobId?: number) =>
+    plans?.find((p) => p.skillId === skillId && (jobId == null || p.jobId === jobId || p.jobId === null));
+  const isSkillPlanServiceUnavailable = (err: unknown) =>
+    err instanceof ApiError && /skill-plan service|temporarily unavailable/i.test(err.message);
 
   const handleGeneratePlan = async (skillId: number, jobId?: number) => {
     setGeneratingSkillId(skillId);
@@ -55,6 +59,10 @@ export function SkillGapsPage() {
       toast.success("Skill improvement plan ready.");
       navigate(`/candidate/skill-plans/${plan.planId}`);
     } catch (err) {
+      if (isSkillPlanServiceUnavailable(err)) {
+        toast.error("AI plan generation is temporarily unavailable. Please try again shortly.");
+        return;
+      }
       toast.error(err instanceof ApiError ? err.message : "Failed to generate improvement plan.");
     } finally {
       setGeneratingSkillId(null);
@@ -75,6 +83,7 @@ export function SkillGapsPage() {
     try {
       await skillGapsApi.removeTargetSkill(candidateId, skillId);
       loadTargetSkills();
+      loadPlans();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to remove skill.");
     }
@@ -152,7 +161,7 @@ export function SkillGapsPage() {
           ) : (
             <div className="space-y-3">
               {details.map((gap, i) => {
-                const plan = planForSkill(gap.skillId);
+                const plan = planForSkill(gap.skillId, gap.jobId);
                 return (
                   <Card key={`${gap.jobId}-${gap.skillId}-${i}`}>
                     <CardContent className="space-y-1 p-4">
@@ -193,56 +202,45 @@ export function SkillGapsPage() {
         </TabsContent>
 
         <TabsContent value="learning">
-          {targetSkills === null ? (
+          {plans === null ? (
             <RowSkeletonList count={3} />
-          ) : targetSkills.length === 0 ? (
+          ) : plans.length === 0 ? (
             <EmptyState
               icon={BookOpen}
-              title="Not tracking any skills yet"
-              description="Click 'Generate Improvement Plan' on any gap in the By Skill tab to start building a learning path."
+              title="No improvement plans yet"
+              description="Generate a plan from the By Skill or By Application tab to start a learning path."
             />
           ) : (
             <div className="space-y-3">
-              {targetSkills.map((target) => {
-                const plan = planForSkill(target.skillId);
+              {plans.map((plan) => {
                 return (
-                  <Card key={target.skillId}>
+                  <Card key={plan.planId}>
                     <CardContent className="space-y-2 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{target.skillName}</p>
-                          <Badge variant={target.status === "Completed" ? "success" : "warning"}>
-                            {target.status === "Completed" ? "Learned" : "Learning"}
-                          </Badge>
+                          <p className="font-medium">{plan.skillName}</p>
+                          <StatusBadge enumName="SkillPlanStatus" value={plan.status} />
                         </div>
                         <div className="flex items-center gap-1">
-                          {plan ? (
-                            <Button size="sm" variant="outline" onClick={() => navigate(`/candidate/skill-plans/${plan.planId}`)}>
-                              View plan ({plan.progressPercent}%)
-                            </Button>
-                          ) : (
-                            target.status !== "Completed" && (
-                              <Button size="sm" variant="outline" onClick={() => handleComplete(target.skillId)}>
-                                <CheckCircle2 className="h-3.5 w-3.5" /> Mark as learned
-                              </Button>
-                            )
-                          )}
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/candidate/skill-plans/${plan.planId}`)}>
+                            View plan ({plan.progressPercent}%)
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground"
-                            onClick={() => handleRemove(target.skillId)}
+                            onClick={() => handleRemove(plan.skillId)}
                           >
                             <X className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
-                      {plan && <Progress value={plan.progressPercent} />}
+                      <Progress value={plan.progressPercent} />
                       <p className="text-xs text-muted-foreground">
-                        Added {formatDate(target.addedAt)}
-                        {target.completedAt ? ` · Completed ${formatDate(target.completedAt)}` : ""}
+                        Added {formatDate(plan.createdAt)}
+                        {plan.jobTitle ? ` - For ${plan.jobTitle}` : ""}
                       </p>
-                      {!plan && <ResourceLinksList resources={resourcesForSkill(target.skillId)} />}
+                      <ResourceLinksList resources={resourcesForSkill(plan.skillId)} />
                     </CardContent>
                   </Card>
                 );

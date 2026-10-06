@@ -69,9 +69,14 @@ export function JobAssessmentPage() {
 
   const handleStart = async () => {
     setAnswers({});
-    setTimedOutIncomplete(false);
     timeoutHandledRef.current = false;
-    await startAssessment(numericJobId);
+    clearAttempt();
+    const started = await startAssessment(numericJobId);
+    if (started) {
+      setTimedOutIncomplete(false);
+      return;
+    }
+    await loadStatus(numericJobId);
   };
 
   const handleSubmit = async () => {
