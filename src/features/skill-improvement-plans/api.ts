@@ -26,9 +26,7 @@ export const skillImprovementPlansApi = {
     if (notes) form.append("notes", notes);
     form.append("file", file);
     return http
-      .post<SkillPlanEvidenceDto>(`${base(candidateId)}/${planId}/evidence`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .post<SkillPlanEvidenceDto>(`${base(candidateId)}/${planId}/evidence`, form)
       .then((r) => r.data);
   },
 

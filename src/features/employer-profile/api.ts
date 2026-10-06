@@ -9,10 +9,10 @@ export const employerProfileApi = {
   uploadLogo: (employerId: number, file: File) => {
     const form = new FormData();
     form.append("file", file);
+    form.append("logo", file);
+    form.append("image", file);
     return http
-      .post<EmployerProfileDto>(`/api/employers/${employerId}/logo`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .post<EmployerProfileDto>(`/api/employers/${employerId}/logo`, form)
       .then((r) => r.data);
   },
 };

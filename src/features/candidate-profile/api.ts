@@ -26,10 +26,10 @@ export const candidateProfileApi = {
   uploadProfilePicture: (candidateId: number, file: File) => {
     const form = new FormData();
     form.append("file", file);
+    form.append("profilePicture", file);
+    form.append("image", file);
     return http
-      .post(`${base(candidateId)}/profile-picture`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .post(`${base(candidateId)}/profile-picture`, form)
       .then((r) => r.data);
   },
 
@@ -65,9 +65,7 @@ export const candidateProfileApi = {
     form.append("file", payload.certificateFile);
 
     return http
-      .post<CertificationDto>(`${base(candidateId)}/certifications`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .post<CertificationDto>(`${base(candidateId)}/certifications`, form)
       .then((r) => r.data);
   },
 
@@ -75,9 +73,7 @@ export const candidateProfileApi = {
     const form = new FormData();
     form.append("file", file);
     return http
-      .post<CertificationDto>(`${base(candidateId)}/certifications/${certificationId}/file`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      .post<CertificationDto>(`${base(candidateId)}/certifications/${certificationId}/file`, form)
       .then((r) => r.data);
   },
 

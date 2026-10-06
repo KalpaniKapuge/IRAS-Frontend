@@ -7,9 +7,7 @@ export const resumesApi = {
   upload: (file: File) => {
     const form = new FormData();
     form.append("file", file);
-    return http
-      .post<ParseResultDto>("/api/resumes", form, { headers: { "Content-Type": "multipart/form-data" } })
-      .then((r) => r.data);
+    return http.post<ParseResultDto>("/api/resumes", form).then((r) => r.data);
   },
 
   createFromCv: (cvId: number) => http.post<ParseResultDto>(`/api/resumes/from-cv/${cvId}`).then((r) => r.data),
