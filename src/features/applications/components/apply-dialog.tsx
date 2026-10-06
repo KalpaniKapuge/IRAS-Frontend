@@ -124,7 +124,11 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
       }}
     >
       <DialogTrigger asChild>
-        <Button size="lg" className="gap-2" disabled={isCheckingApplication || !!existingApplication}>
+        <Button
+          size="lg"
+          className="h-auto min-h-12 w-full max-w-sm whitespace-normal px-5 py-3 text-base font-bold leading-tight shadow-elevated sm:w-auto"
+          disabled={isCheckingApplication || !!existingApplication}
+        >
           <Send className="h-4 w-4" /> {isCheckingApplication ? "Checking..." : existingApplication ? "Already applied" : "Apply now"}
         </Button>
       </DialogTrigger>

@@ -33,7 +33,11 @@ export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
         </p>
       </div>
 
-      <div className="flex justify-center">{actionSlot}</div>
+      {actionSlot && (
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 shadow-soft">
+          <div className="flex justify-center">{actionSlot}</div>
+        </div>
+      )}
 
       <Card className="border-border">
         <CardContent className="p-6">

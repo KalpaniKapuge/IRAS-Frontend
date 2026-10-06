@@ -66,8 +66,9 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
-        <div className="bg-gradient-to-br from-primary via-info to-chart-2 px-8 py-10 text-primary-foreground sm:px-12 sm:py-14">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-info to-chart-2 px-8 py-10 text-primary-foreground sm:px-12 sm:py-14">
+          <div className="absolute inset-0 bg-grid opacity-15" />
+          <div className="relative flex flex-col justify-between gap-7 lg:flex-row lg:items-start">
             <div className="min-w-0">
               <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
                 <Building2 className="h-3.5 w-3.5" /> {job.companyName ?? "Confidential"}
@@ -80,7 +81,11 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
                 {job.postedAt && ` · Posted ${formatDate(job.postedAt)}`}
               </p>
             </div>
-            {actionSlot && <div className="shrink-0">{actionSlot}</div>}
+            {actionSlot && (
+              <div className="w-full shrink-0 rounded-xl border border-primary-foreground/25 bg-primary-foreground/15 p-3 shadow-elevated backdrop-blur sm:w-fit">
+                {actionSlot}
+              </div>
+            )}
           </div>
         </div>
       </Card>

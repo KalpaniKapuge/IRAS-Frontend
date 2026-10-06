@@ -47,7 +47,7 @@ export function JobDetailPage() {
   const actionSlot = needsAssessment ? (
     <Button
       size="lg"
-      className="h-auto min-h-12 w-full max-w-sm whitespace-normal border border-primary-foreground/50 bg-primary px-5 py-3 text-base font-bold leading-tight text-primary-foreground shadow-elevated ring-2 ring-primary-foreground/20 hover:bg-primary/90 sm:w-auto"
+      className="h-auto min-h-12 w-full max-w-sm whitespace-normal border border-primary-foreground/70 bg-card px-5 py-3 text-base font-bold leading-tight text-primary shadow-elevated ring-2 ring-primary-foreground/20 hover:bg-card/90 sm:w-auto"
       onClick={() => navigate(`/candidate/jobs/${job.jobId}/assessment`)}
     >
       <ClipboardList className="h-5 w-5" />
