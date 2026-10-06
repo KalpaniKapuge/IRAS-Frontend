@@ -14,7 +14,7 @@ import type { JobTemplateProps } from "./types";
 // card made JobDescription's theme-aware text unreadable on it.
 const FACT_TINTS = [
   "bg-primary/10 text-primary",
-  "bg-chart-2/15 text-chart-2",
+  "bg-info/10 text-info",
   "bg-primary/15 text-primary",
   "bg-info/15 text-info",
   "bg-warning/15 text-warning",
@@ -33,13 +33,13 @@ function FactChip({
   tint: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+    <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
       <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", tint)}>
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-bold leading-tight text-foreground">{value}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="truncate text-sm font-semibold leading-tight text-foreground">{value}</p>
       </div>
     </div>
   );
@@ -66,14 +66,14 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-info to-chart-2 px-8 py-10 text-primary-foreground sm:px-12 sm:py-14">
-          <div className="absolute inset-0 bg-grid opacity-15" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-info px-8 py-10 text-primary-foreground sm:px-12 sm:py-12">
+          <div className="absolute inset-0 bg-grid opacity-10" />
           <div className="relative flex flex-col justify-between gap-7 lg:flex-row lg:items-start">
             <div className="min-w-0">
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-bold uppercase tracking-wide">
                 <Building2 className="h-3.5 w-3.5" /> {job.companyName ?? "Confidential"}
               </p>
-              <h1 className="mt-4 max-w-3xl text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl">
+              <h1 className="mt-4 max-w-3xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
                 {job.title}
               </h1>
               <p className="mt-3 text-sm font-medium opacity-90">
@@ -82,7 +82,7 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
               </p>
             </div>
             {actionSlot && (
-              <div className="w-full shrink-0 rounded-xl border border-primary-foreground/25 bg-primary-foreground/15 p-3 shadow-elevated backdrop-blur sm:w-fit">
+              <div className="w-full shrink-0 rounded-xl border border-primary-foreground/25 bg-primary-foreground/15 p-3 shadow-elevated backdrop-blur-md ring-1 ring-primary-foreground/10 sm:w-fit">
                 {actionSlot}
               </div>
             )}
@@ -106,8 +106,8 @@ export function BoldTemplate({ job, actionSlot }: JobTemplateProps) {
         <div className="space-y-4">
           <Card className="overflow-hidden border-none bg-gradient-to-br from-primary to-info shadow-elevated">
             <CardContent className="p-6 text-primary-foreground">
-              <p className="text-6xl font-black leading-none">{mustHave.length}</p>
-              <p className="mt-2 text-sm font-bold uppercase tracking-wide opacity-95">
+              <p className="text-5xl font-extrabold leading-none">{mustHave.length}</p>
+              <p className="mt-2 text-xs font-bold uppercase tracking-wide opacity-95">
                 Must-have skill{mustHave.length === 1 ? "" : "s"}
               </p>
               <p className="mt-1 text-xs opacity-80">

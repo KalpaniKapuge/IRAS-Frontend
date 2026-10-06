@@ -10,21 +10,21 @@ export function ModernTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden border-none shadow-elevated">
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-info to-chart-2 px-6 py-8 text-primary-foreground sm:px-8 sm:py-10">
-          <div className="absolute inset-0 bg-grid opacity-15" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-info px-6 py-8 text-primary-foreground sm:px-8 sm:py-10">
+          <div className="absolute inset-0 bg-grid opacity-10" />
           <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
             <div className="min-w-0 max-w-3xl">
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/25 bg-primary-foreground/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-foreground">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-foreground">
                 <Building2 className="h-4 w-4" /> {job.companyName ?? "Confidential"}
               </p>
-              <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl">{job.title}</h1>
+              <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{job.title}</h1>
               <p className="mt-3 max-w-2xl text-sm font-medium text-primary-foreground/85">
                 {job.seniorityLevel} role with {job.requiredSkills.length} required skill
                 {job.requiredSkills.length === 1 ? "" : "s"} and {job.minExpYears}+ years minimum experience.
               </p>
             </div>
             {actionSlot && (
-              <div className="w-full shrink-0 rounded-xl border border-primary-foreground/25 bg-primary-foreground/15 p-3 shadow-elevated backdrop-blur sm:w-fit">
+              <div className="w-full shrink-0 rounded-xl border border-primary-foreground/25 bg-primary-foreground/15 p-3 shadow-elevated backdrop-blur-md ring-1 ring-primary-foreground/10 sm:w-fit">
                 {actionSlot}
               </div>
             )}

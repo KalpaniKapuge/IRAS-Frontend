@@ -22,19 +22,19 @@ function FactRow({ icon: Icon, label, value }: { icon: typeof Briefcase; label: 
 // to read like a formal printed job notice rather than a web dashboard card.
 export function ClassicTemplate({ job, actionSlot }: JobTemplateProps) {
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <div className="space-y-4 rounded-xl border border-border bg-gradient-to-b from-primary/10 to-card px-6 pb-6 pt-8 text-center font-serif shadow-soft">
-        <p className="flex items-center justify-center gap-1.5 text-sm font-semibold uppercase tracking-widest text-primary">
+    <div className="mx-auto max-w-3xl space-y-7">
+      <div className="space-y-3 rounded-xl border border-border bg-gradient-to-b from-primary/10 to-card px-6 pb-6 pt-8 text-center font-serif shadow-soft">
+        <p className="flex items-center justify-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
           <Building2 className="h-4 w-4" /> {job.companyName ?? "Confidential"}
         </p>
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground">{job.title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{job.title}</h1>
         <p className="text-sm text-muted-foreground">
           {job.seniorityLevel} Position {job.postedAt && `· Posted ${formatDate(job.postedAt)}`}
         </p>
       </div>
 
       {actionSlot && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 shadow-soft">
+        <div className="rounded-xl border border-primary/25 bg-gradient-to-r from-primary/10 via-info/5 to-primary/10 p-3 shadow-soft backdrop-blur-md ring-1 ring-primary/10">
           <div className="flex justify-center">{actionSlot}</div>
         </div>
       )}
