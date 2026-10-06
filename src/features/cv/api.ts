@@ -22,8 +22,9 @@ export const cvApi = {
   uploadPhoto: (cvId: number, file: File) => {
     const form = new FormData();
     form.append("file", file);
+    form.append("photo", file);
     return http
-      .post<CvDetailDto>(`/api/cv/${cvId}/photo`, form, { headers: { "Content-Type": "multipart/form-data" } })
+      .post<CvDetailDto>(`/api/cv/${cvId}/photo`, form)
       .then((r) => r.data);
   },
 

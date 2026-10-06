@@ -28,14 +28,18 @@ apiClient.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
   return config;
 });
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ message?: string; title?: string; errors?: Record<string, string[]> }>) => {
+  (error: AxiosError<{ message?: string; title?: string; detail?: string; errors?: Record<string, string[]> } | string>) => {
     const status = error.response?.status ?? 0;
     const data = error.response?.data;
+    const problem = typeof data === "string" ? undefined : data;
 
     if (status === 401 && onUnauthorized) {
       onUnauthorized();
@@ -45,27 +49,32 @@ apiClient.interceptors.response.use(
 
     // ASP.NET Core's automatic model validation (e.g. a [StringLength] violation) returns a
     // ValidationProblemDetails with a generic title ("One or more validation errors
-    // occurred") and the actual per-field reasons in `errors` — surface those instead of
+    // occurred") and the actual per-field reasons in `errors`; surface those instead of
     // the useless generic title, everywhere in the app, not just for this one field.
-    const fieldErrorSummary = data?.errors && Object.keys(data.errors).length > 0
-      ? Object.entries(data.errors).map(([field, msgs]) => `${field}: ${msgs.join(" ")}`).join(" — ")
-      : undefined;
+    const fieldErrorSummary =
+      problem?.errors && Object.keys(problem.errors).length > 0
+        ? Object.entries(problem.errors).map(([field, msgs]) => `${field}: ${msgs.join(" ")}`).join(" - ")
+        : undefined;
 
     const message =
-      data?.message ??
+      problem?.message ??
       fieldErrorSummary ??
-      data?.title ??
+      problem?.detail ??
+      problem?.title ??
+      (typeof data === "string" && data.trim().length > 0 ? data : undefined) ??
       (timedOut
         ? "The server took too long to respond. Please try again."
         : status === 0
-        ? "Could not reach the server. Check your connection and try again."
-        : status === 403
-          ? "You don't have permission to do that."
-          : status === 404
-            ? "The requested resource was not found."
-            : "Something went wrong. Please try again.");
+          ? "Could not reach the server. Check your connection and try again."
+          : status === 403
+            ? "You don't have permission to do that."
+            : status === 404
+              ? "The requested resource was not found."
+              : status === 413
+                ? "The file is too large to upload."
+                : "Something went wrong. Please try again.");
 
-    return Promise.reject(new ApiError(message, status, data?.errors));
+    return Promise.reject(new ApiError(message, status, problem?.errors));
   },
 );
 
