@@ -29,6 +29,23 @@ function handle(err: unknown, fallback: string) {
   toast.error(err instanceof ApiError ? err.message : fallback);
 }
 
+async function startWithFallbackTimeout(jobId: number, fallbackAttempt?: StartAssessmentResponse) {
+  if (!fallbackAttempt) return assessmentsApi.start(jobId);
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<StartAssessmentResponse>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new ApiError("Assessment generation is taking too long.", 0));
+    }, 8_000);
+  });
+
+  try {
+    return await Promise.race([assessmentsApi.start(jobId), timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
+
 export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
   status: null,
   attempt: null,
@@ -52,7 +69,7 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
   startAssessment: async (jobId, fallbackAttempt) => {
     set({ isStarting: true, startError: null });
     try {
-      const attempt = await assessmentsApi.start(jobId);
+      const attempt = await startWithFallbackTimeout(jobId, fallbackAttempt);
       if (attempt.questions.length === 0) {
         throw new ApiError("No quiz questions were generated for this job. Please check the job's required skills and try again.", 0);
       }
