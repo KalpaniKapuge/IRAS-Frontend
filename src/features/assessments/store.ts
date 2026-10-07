@@ -68,6 +68,11 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
 
   startAssessment: async (jobId, fallbackAttempt) => {
     set({ isStarting: true, startError: null });
+    if (fallbackAttempt && fallbackAttempt.questions.length > 0) {
+      set({ attempt: fallbackAttempt, result: null, status: null, isStarting: false, startError: null });
+      return true;
+    }
+
     try {
       const attempt = await startWithFallbackTimeout(jobId, fallbackAttempt);
       if (attempt.questions.length === 0) {
