@@ -24,7 +24,7 @@ function formatRemaining(totalSeconds: number) {
 }
 
 function buildFallbackAssessment(job: JobDto): StartAssessmentResponse {
-  const skills = job.requiredSkills
+  const skills = (job.requiredSkills ?? [])
     .map((skill) => skill.skillName?.trim())
     .filter((skill): skill is string => Boolean(skill));
   const focusSkills = skills.length > 0 ? skills.slice(0, 4) : [job.title];
