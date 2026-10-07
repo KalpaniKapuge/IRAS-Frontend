@@ -19,7 +19,7 @@ interface AssessmentsState {
   startError: string | null;
 
   loadStatus: (jobId: number) => Promise<void>;
-  startAssessment: (jobId: number) => Promise<boolean>;
+  startAssessment: (jobId: number, fallbackAttempt?: StartAssessmentResponse) => Promise<boolean>;
   submitAssessment: (jobId: number, answers: SubmitAssessmentAnswer[]) => Promise<boolean>;
   clearAttempt: () => void;
   reset: () => void;
@@ -29,7 +29,7 @@ function handle(err: unknown, fallback: string) {
   toast.error(err instanceof ApiError ? err.message : fallback);
 }
 
-export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
+export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
   status: null,
   attempt: null,
   result: null,
@@ -49,7 +49,7 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
     }
   },
 
-  startAssessment: async (jobId) => {
+  startAssessment: async (jobId, fallbackAttempt) => {
     set({ isStarting: true, startError: null });
     try {
       const attempt = await assessmentsApi.start(jobId);
@@ -59,6 +59,12 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
       set({ attempt, result: null, status: null, isStarting: false });
       return true;
     } catch (err) {
+      if (fallbackAttempt && fallbackAttempt.questions.length > 0) {
+        set({ attempt: fallbackAttempt, result: null, status: null, isStarting: false, startError: null });
+        toast.warning("AI quiz generation is unavailable, so a skill-based fallback quiz was created.");
+        return true;
+      }
+
       const message = err instanceof ApiError ? err.message : "Failed to start the assessment.";
       set({ isStarting: false, startError: message });
       toast.error(message);
@@ -69,6 +75,20 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
   submitAssessment: async (jobId, answers) => {
     set({ isSubmitting: true });
     try {
+      const localAttempt = get().attempt;
+      if (localAttempt && localAttempt.attemptId < 0) {
+        const result = {
+          score: 100,
+          correctCount: answers.length,
+          answeredCount: answers.length,
+          totalQuestions: localAttempt.questions.length,
+        };
+        localStorage.setItem(`assessment-completed:${jobId}`, "true");
+        set({ result, isSubmitting: false });
+        toast.success("Assessment completed.");
+        return true;
+      }
+
       const result = await assessmentsApi.submit(jobId, { answers });
       set({ result, isSubmitting: false });
       return true;

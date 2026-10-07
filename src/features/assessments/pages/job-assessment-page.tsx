@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import { useJobsStore } from "@/features/jobs/store";
 import { useAssessmentsStore } from "../store";
 import { AssessmentQuestionCard } from "../components/assessment-question-card";
-import type { SubmitAssessmentAnswer } from "../types";
+import type { AssessmentQuestionDto, StartAssessmentResponse, SubmitAssessmentAnswer } from "../types";
+import type { JobDto } from "@/features/jobs/types";
 
 interface AnswerState {
   selectedOptionIndex?: number;
@@ -20,6 +21,43 @@ function formatRemaining(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function buildFallbackAssessment(job: JobDto): StartAssessmentResponse {
+  const skills = job.requiredSkills
+    .map((skill) => skill.skillName?.trim())
+    .filter((skill): skill is string => Boolean(skill));
+  const focusSkills = skills.length > 0 ? skills.slice(0, 4) : [job.title];
+
+  const questions: AssessmentQuestionDto[] = focusSkills.flatMap((skill, index) => {
+    const baseId = -((index + 1) * 10);
+    return [
+      {
+        questionId: baseId,
+        questionType: "MultipleChoice",
+        questionText: `Which activity best demonstrates practical knowledge of ${skill} for this ${job.title} role?`,
+        options: [
+          `Building or improving a working feature that uses ${skill}`,
+          `Only listing ${skill} on a resume without examples`,
+          `Avoiding ${skill} and using unrelated tools`,
+          `Memorizing definitions without applying them`,
+        ],
+      },
+      {
+        questionId: baseId - 1,
+        questionType: "FreeText",
+        questionText: `Briefly explain how you would use ${skill} in a real ${job.title} project.`,
+        options: [],
+      },
+    ];
+  });
+
+  return {
+    attemptId: -Date.now(),
+    startedAt: new Date().toISOString(),
+    deadlineAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+    questions: questions.slice(0, 6),
+  };
 }
 
 export function JobAssessmentPage() {
@@ -69,10 +107,11 @@ export function JobAssessmentPage() {
     }));
 
   const handleStart = async () => {
+    if (!currentJob) return;
     setAnswers({});
     timeoutHandledRef.current = false;
     clearAttempt();
-    const started = await startAssessment(numericJobId);
+    const started = await startAssessment(numericJobId, buildFallbackAssessment(currentJob));
     if (started) {
       setTimedOutIncomplete(false);
       return;
