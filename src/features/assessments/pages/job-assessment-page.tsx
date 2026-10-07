@@ -35,6 +35,7 @@ export function JobAssessmentPage() {
     isLoading,
     isStarting,
     isSubmitting,
+    startError,
     loadStatus,
     startAssessment,
     submitAssessment,
@@ -252,9 +253,16 @@ export function JobAssessmentPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button onClick={handleStart} loading={isStarting}>
-            {timedOutIncomplete ? "Start again" : status?.hasAttempted ? "Resume assessment" : "Start assessment"}
-          </Button>
+          <div className="flex flex-col items-center gap-3">
+            {startError && (
+              <p className="max-w-lg rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+                {startError}
+              </p>
+            )}
+            <Button onClick={handleStart} loading={isStarting}>
+              {timedOutIncomplete ? "Start again" : status?.hasAttempted ? "Resume assessment" : "Start assessment"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

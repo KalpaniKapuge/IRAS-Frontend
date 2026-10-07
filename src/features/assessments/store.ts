@@ -16,6 +16,7 @@ interface AssessmentsState {
   isLoading: boolean;
   isStarting: boolean;
   isSubmitting: boolean;
+  startError: string | null;
 
   loadStatus: (jobId: number) => Promise<void>;
   startAssessment: (jobId: number) => Promise<boolean>;
@@ -35,6 +36,7 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
   isLoading: false,
   isStarting: false,
   isSubmitting: false,
+  startError: null,
 
   loadStatus: async (jobId) => {
     set({ isLoading: true });
@@ -48,14 +50,18 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
   },
 
   startAssessment: async (jobId) => {
-    set({ isStarting: true });
+    set({ isStarting: true, startError: null });
     try {
       const attempt = await assessmentsApi.start(jobId);
+      if (attempt.questions.length === 0) {
+        throw new ApiError("No quiz questions were generated for this job. Please check the job's required skills and try again.", 0);
+      }
       set({ attempt, result: null, status: null, isStarting: false });
       return true;
     } catch (err) {
-      set({ isStarting: false });
-      handle(err, "Failed to start the assessment.");
+      const message = err instanceof ApiError ? err.message : "Failed to start the assessment.";
+      set({ isStarting: false, startError: message });
+      toast.error(message);
       return false;
     }
   },
@@ -74,5 +80,5 @@ export const useAssessmentsStore = create<AssessmentsState>()((set) => ({
   },
 
   clearAttempt: () => set({ attempt: null }),
-  reset: () => set({ status: null, attempt: null, result: null }),
+  reset: () => set({ status: null, attempt: null, result: null, startError: null }),
 }));
