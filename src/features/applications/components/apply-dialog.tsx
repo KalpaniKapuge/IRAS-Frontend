@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { FileText, LayoutTemplate, Send } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,8 @@ import { resumesApi } from "@/features/resumes/api";
 import type { ParseResultDto, ResumeDto } from "@/features/resumes/types";
 import { cvApi } from "@/features/cv/api";
 import type { CvSummaryDto } from "@/features/cv/types";
+import { assessmentsApi } from "@/features/assessments/api";
+import { ApiError } from "@/types/common";
 import { useApplicationsStore } from "../store";
 
 function isUsableResume(resume: ResumeDto) {
@@ -108,6 +111,16 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
 
   const handleApply = async () => {
     if (!selectedId) return;
+    try {
+      const assessmentStatus = await assessmentsApi.getStatus(jobId);
+      if (assessmentStatus.requireAssessment && !assessmentStatus.isCompleted) {
+        throw new ApiError("Complete the skill assessment for this job before applying.", 400);
+      }
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Could not verify assessment completion. Please try again.");
+      return;
+    }
+
     const ok = await apply({ jobId, resumeId: selectedId });
     if (ok) {
       setSubmitted(true);

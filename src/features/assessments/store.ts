@@ -36,7 +36,7 @@ async function startWithFallbackTimeout(jobId: number, fallbackAttempt?: StartAs
   const timeout = new Promise<StartAssessmentResponse>((_, reject) => {
     timeoutId = setTimeout(() => {
       reject(new ApiError("Assessment generation is taking too long.", 0));
-    }, 8_000);
+    }, 3_000);
   });
 
   try {
@@ -96,7 +96,10 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
       if (localAttempt && localAttempt.attemptId < 0) {
         const serverAttempt = await assessmentsApi.start(jobId);
         if (serverAttempt.questions.length === 0) {
-          throw new ApiError("Could not create the official assessment record. Please try again.", 0);
+          throw new ApiError(
+            "Could not save the official assessment record. Please try again, or ask the admin to fix backend assessment generation.",
+            0,
+          );
         }
 
         const serverAnswers = serverAttempt.questions.map((question, index) => {
@@ -130,7 +133,7 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
       return true;
     } catch (err) {
       set({ isSubmitting: false });
-      handle(err, "Failed to submit the assessment.");
+      handle(err, "Failed to submit the assessment. The application can only be submitted after the backend confirms completion.");
       return false;
     }
   },
