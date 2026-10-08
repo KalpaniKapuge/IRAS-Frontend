@@ -68,11 +68,6 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
 
   startAssessment: async (jobId, fallbackAttempt) => {
     set({ isStarting: true, startError: null });
-    if (fallbackAttempt && fallbackAttempt.questions.length > 0) {
-      set({ attempt: fallbackAttempt, result: null, status: null, isStarting: false, startError: null });
-      return true;
-    }
-
     try {
       const attempt = await startWithFallbackTimeout(jobId, fallbackAttempt);
       if (attempt.questions.length === 0) {
@@ -121,14 +116,17 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
 
         const result = await assessmentsApi.submit(jobId, { answers: serverAnswers });
         localStorage.setItem(`assessment-completed:${jobId}`, "true");
+        const status = await assessmentsApi.getStatus(jobId);
         set({ result, isSubmitting: false });
+        set({ status });
         toast.success("Assessment completed and synced.");
         return true;
       }
 
       const result = await assessmentsApi.submit(jobId, { answers });
       localStorage.setItem(`assessment-completed:${jobId}`, "true");
-      set({ result, isSubmitting: false });
+      const status = await assessmentsApi.getStatus(jobId);
+      set({ result, status, isSubmitting: false });
       return true;
     } catch (err) {
       set({ isSubmitting: false });

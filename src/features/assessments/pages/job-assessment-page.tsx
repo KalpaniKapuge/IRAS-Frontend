@@ -123,7 +123,8 @@ export function JobAssessmentPage() {
   };
 
   const handleSubmit = async () => {
-    await submitAssessment(numericJobId, buildSubmitPayload());
+    const submitted = await submitAssessment(numericJobId, buildSubmitPayload());
+    if (submitted) await loadStatus(numericJobId);
   };
 
   const isQuestionAnswered = (questionId: number) => {

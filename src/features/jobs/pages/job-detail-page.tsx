@@ -43,8 +43,7 @@ export function JobDetailPage() {
   const job = currentJob;
   const Template = JOB_TEMPLATES[(job.templateKey as JobTemplateKey) ?? "modern"] ?? JOB_TEMPLATES.modern;
 
-  const locallyCompletedAssessment = localStorage.getItem(`assessment-completed:${job.jobId}`) === "true";
-  const needsAssessment = job.requireAssessment && !assessmentStatus?.isCompleted && !locallyCompletedAssessment;
+  const needsAssessment = job.requireAssessment && !assessmentStatus?.isCompleted;
   const actionSlot = needsAssessment ? (
     <Button
       size="lg"
