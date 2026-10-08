@@ -36,7 +36,7 @@ async function startWithFallbackTimeout(jobId: number, fallbackAttempt?: StartAs
   const timeout = new Promise<StartAssessmentResponse>((_, reject) => {
     timeoutId = setTimeout(() => {
       reject(new ApiError("Assessment generation is taking too long.", 0));
-    }, 3_000);
+    }, 30_000);
   });
 
   try {
@@ -78,7 +78,6 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
     } catch (err) {
       if (fallbackAttempt && fallbackAttempt.questions.length > 0) {
         set({ attempt: fallbackAttempt, result: null, status: null, isStarting: false, startError: null });
-        toast.warning("AI quiz generation is unavailable, so a skill-based fallback quiz was created.");
         return true;
       }
 

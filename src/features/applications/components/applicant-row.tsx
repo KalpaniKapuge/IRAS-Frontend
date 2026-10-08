@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { CalendarClock, ChevronDown, ClipboardList, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { formatDate } from "@/lib/format";
 import { cn, formatScore, getInitials } from "@/lib/utils";
-import { EMPLOYER_SETTABLE_STATUSES, type ApplicationStatus } from "@/types/enums";
+import type { ApplicationStatus } from "@/types/enums";
 import { useInterviewsStore } from "@/features/interviews/store";
 import { ScheduleInterviewDialog } from "@/features/interviews/components/schedule-interview-dialog";
 import { InterviewListItem } from "@/features/interviews/components/interview-list-item";
@@ -62,19 +61,7 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
           <p className="text-lg font-semibold">{formatScore(applicant.totalMarks)}%</p>
         </div>
 
-        {isTerminal ? (
-          <StatusBadge enumName="ApplicationStatus" value={applicant.status} />
-        ) : (
-          <Select value={applicant.status} onValueChange={(v) => onStatusChange(applicant.applicationId, v as ApplicationStatus)}>
-            <SelectTrigger className="h-9 w-36"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={applicant.status} disabled>{applicant.status} (current)</SelectItem>
-              {EMPLOYER_SETTABLE_STATUSES.filter((s) => s !== applicant.status).map((status) => (
-                <SelectItem key={status} value={status}>{status}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <StatusBadge enumName="ApplicationStatus" value={applicant.status} />
 
         <Button variant="outline" size="sm" asChild>
           <a href={applicant.resumeFileUrl}>
@@ -127,7 +114,7 @@ export function ApplicantRow({ applicant, employerId, jobId, onStatusChange }: A
       {expanded && (
         <div className="space-y-4 border-t border-border p-4">
           <ScoreBreakdown
-            totalScore={applicant.totalScore}
+            totalScore={applicant.totalMarks}
             skillMatch={applicant.skillMatch}
             experienceMatch={applicant.experienceMatch}
             educationMatch={applicant.educationMatch}

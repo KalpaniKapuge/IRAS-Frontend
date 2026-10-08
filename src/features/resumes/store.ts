@@ -18,6 +18,10 @@ interface ResumeState {
   dismissParseResult: () => void;
 }
 
+function isTemporaryParseUnavailable(result: ParseResultDto) {
+  return /temporarily unavailable|retry parsing later|analysis service/i.test(result.parseError ?? "");
+}
+
 export const useResumeStore = create<ResumeState>()((set, get) => ({
   resumes: [],
   isLoading: false,
@@ -43,7 +47,11 @@ export const useResumeStore = create<ResumeState>()((set, get) => ({
       if (result.parseStatus === "Parsed" && result.suggestedSkills.length > 0) {
         set({ pendingParseResult: result });
       } else if (result.parseStatus === "Failed") {
-        toast.error(result.parseError ?? "Resume parsing failed. You can retry from the resume list.");
+        toast.success(
+          isTemporaryParseUnavailable(result)
+            ? "Resume uploaded. You can continue, and parsing can be retried later."
+            : "Resume uploaded. You can retry parsing from the resume list.",
+        );
       } else {
         toast.success("Resume uploaded.");
       }
@@ -63,7 +71,11 @@ export const useResumeStore = create<ResumeState>()((set, get) => ({
       if (result.parseStatus === "Parsed" && result.suggestedSkills.length > 0) {
         set({ pendingParseResult: result });
       } else if (result.parseStatus === "Failed") {
-        toast.error(result.parseError ?? "Resume parsing failed again.");
+        toast.success(
+          isTemporaryParseUnavailable(result)
+            ? "Resume saved. Parsing can be retried later."
+            : "Resume retry finished; you can continue with the saved file.",
+        );
       } else {
         toast.success("Resume parsed successfully.");
       }

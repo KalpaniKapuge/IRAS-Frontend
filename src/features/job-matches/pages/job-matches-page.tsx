@@ -107,9 +107,13 @@ export function JobMatchesPage() {
                       </Badge>
                     )}
                     <div className="flex justify-end">
-                      <Button size="sm" asChild>
-                        <Link to={`/candidate/jobs/${rec.jobId}`}>View job</Link>
-                      </Button>
+                      {rec.hasApplied ? (
+                        <Badge variant="success">Already applied</Badge>
+                      ) : (
+                        <Button size="sm" asChild>
+                          <Link to={`/candidate/jobs/${rec.jobId}`}>View job</Link>
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -150,9 +154,13 @@ export function JobMatchesPage() {
                     <ScoreBar value={match.matchScore} label="Match strength" />
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">Matched {formatRelative(match.matchedAt)}</p>
-                      <Button size="sm" asChild>
-                        <Link to={`/candidate/jobs/${match.jobId}`}>View job</Link>
-                      </Button>
+                      {match.hasApplied ? (
+                        <Badge variant="success">Already applied</Badge>
+                      ) : (
+                        <Button size="sm" asChild>
+                          <Link to={`/candidate/jobs/${match.jobId}`}>View job</Link>
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

@@ -5,6 +5,7 @@ export interface JobMatchDto {
   companyName: string | null;
   matchScore: number;
   thresholdPassed: boolean;
+  hasApplied: boolean;
   matchedAt: string;
 }
 
@@ -19,4 +20,5 @@ export interface JobRecommendationDto {
   skillMatch: number;
   semanticSimilarity: number;
   mlFitScore: number | null;
+  hasApplied: boolean;
 }

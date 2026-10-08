@@ -54,8 +54,6 @@ export function SkillGapsPage() {
   const targetStatus = (skillId: number) => targetSkills?.find((t) => t.skillId === skillId)?.status;
   const planForSkill = (skillId: number, jobId?: number) =>
     plans?.find((p) => p.skillId === skillId && (jobId == null || p.jobId === jobId || p.jobId === null));
-  const isSkillPlanServiceUnavailable = (err: unknown) =>
-    err instanceof ApiError && /skill-plan service|temporarily unavailable/i.test(err.message);
 
   const handleGeneratePlan = async (params: {
     skillId: number;
@@ -68,7 +66,6 @@ export function SkillGapsPage() {
     setGeneratingSkillId(skillId);
     try {
       const plan = await skillGapsApi.generatePlan(candidateId, skillId, jobId);
-      toast.success("Skill improvement plan ready.");
       navigate(`/candidate/skill-plans/${plan.planId}`);
     } catch (err) {
       const fallbackPlan = saveLocalSkillPlan(
@@ -76,11 +73,6 @@ export function SkillGapsPage() {
         buildLocalSkillPlan({ skillId, skillName, jobId, jobTitle, suggestion }),
       );
       setPlans((current) => [fallbackPlan, ...(current ?? []).filter((plan) => plan.planId !== fallbackPlan.planId)]);
-      toast.success(
-        isSkillPlanServiceUnavailable(err)
-          ? "AI plan service is unavailable, so a practical improvement plan was created."
-          : "A practical improvement plan was created.",
-      );
       navigate(`/candidate/skill-plans/${fallbackPlan.planId}`);
     } finally {
       setGeneratingSkillId(null);
