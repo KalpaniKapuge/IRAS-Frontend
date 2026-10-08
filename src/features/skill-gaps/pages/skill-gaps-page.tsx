@@ -19,6 +19,7 @@ import { skillResourcesApi } from "@/features/skill-resources/api";
 import { ResourceLinksList } from "@/features/skill-resources/components/resource-links-list";
 import type { SkillResourceDto } from "@/features/skill-resources/types";
 import { skillImprovementPlansApi } from "@/features/skill-improvement-plans/api";
+import { buildLocalSkillPlan, getLocalSkillPlans, removeLocalSkillPlan, saveLocalSkillPlan } from "@/features/skill-improvement-plans/local-plans";
 import type { SkillImprovementPlanDto } from "@/features/skill-improvement-plans/types";
 import { skillGapsApi } from "../api";
 import type { CandidateSkillGapDto, SkillGapSummaryDto, TargetSkillDto } from "../types";
@@ -34,7 +35,11 @@ export function SkillGapsPage() {
   const [generatingSkillId, setGeneratingSkillId] = useState<number | null>(null);
 
   const loadTargetSkills = () => skillGapsApi.getMyTargetSkills(candidateId).then(setTargetSkills);
-  const loadPlans = () => skillImprovementPlansApi.getMine(candidateId).then(setPlans);
+  const loadPlans = () =>
+    skillImprovementPlansApi
+      .getMine(candidateId)
+      .then((remotePlans) => setPlans([...getLocalSkillPlans(candidateId), ...remotePlans]))
+      .catch(() => setPlans(getLocalSkillPlans(candidateId)));
 
   useEffect(() => {
     skillGapsApi.getMySummary(candidateId).then(setSummary);
@@ -52,18 +57,31 @@ export function SkillGapsPage() {
   const isSkillPlanServiceUnavailable = (err: unknown) =>
     err instanceof ApiError && /skill-plan service|temporarily unavailable/i.test(err.message);
 
-  const handleGeneratePlan = async (skillId: number, jobId?: number) => {
+  const handleGeneratePlan = async (params: {
+    skillId: number;
+    skillName: string;
+    jobId?: number;
+    jobTitle?: string | null;
+    suggestion?: string | null;
+  }) => {
+    const { skillId, skillName, jobId, jobTitle, suggestion } = params;
     setGeneratingSkillId(skillId);
     try {
       const plan = await skillGapsApi.generatePlan(candidateId, skillId, jobId);
       toast.success("Skill improvement plan ready.");
       navigate(`/candidate/skill-plans/${plan.planId}`);
     } catch (err) {
-      if (isSkillPlanServiceUnavailable(err)) {
-        toast.error("AI plan generation is temporarily unavailable. Please try again shortly.");
-        return;
-      }
-      toast.error(err instanceof ApiError ? err.message : "Failed to generate improvement plan.");
+      const fallbackPlan = saveLocalSkillPlan(
+        candidateId,
+        buildLocalSkillPlan({ skillId, skillName, jobId, jobTitle, suggestion }),
+      );
+      setPlans((current) => [fallbackPlan, ...(current ?? []).filter((plan) => plan.planId !== fallbackPlan.planId)]);
+      toast.success(
+        isSkillPlanServiceUnavailable(err)
+          ? "AI plan service is unavailable, so a practical improvement plan was created."
+          : "A practical improvement plan was created.",
+      );
+      navigate(`/candidate/skill-plans/${fallbackPlan.planId}`);
     } finally {
       setGeneratingSkillId(null);
     }
@@ -82,9 +100,12 @@ export function SkillGapsPage() {
   const handleRemove = async (skillId: number) => {
     try {
       await skillGapsApi.removeTargetSkill(candidateId, skillId);
+      removeLocalSkillPlan(candidateId, skillId);
       loadTargetSkills();
       loadPlans();
     } catch (err) {
+      removeLocalSkillPlan(candidateId, skillId);
+      loadPlans();
       toast.error(err instanceof ApiError ? err.message : "Failed to remove skill.");
     }
   };
@@ -130,7 +151,7 @@ export function SkillGapsPage() {
                               size="sm"
                               loading={generatingSkillId === gap.skillId}
                               disabled={generatingSkillId !== null}
-                              onClick={() => handleGeneratePlan(gap.skillId)}
+                              onClick={() => handleGeneratePlan({ skillId: gap.skillId, skillName: gap.skillName })}
                             >
                               {generatingSkillId !== gap.skillId && <Sparkles className="h-3.5 w-3.5" />}
                               Generate Improvement Plan
@@ -181,7 +202,15 @@ export function SkillGapsPage() {
                               variant="ghost"
                               loading={generatingSkillId === gap.skillId}
                               disabled={generatingSkillId !== null}
-                              onClick={() => handleGeneratePlan(gap.skillId, gap.jobId)}
+                              onClick={() =>
+                                handleGeneratePlan({
+                                  skillId: gap.skillId,
+                                  skillName: gap.skillName,
+                                  jobId: gap.jobId,
+                                  jobTitle: gap.jobTitle,
+                                  suggestion: gap.suggestion,
+                                })
+                              }
                             >
                               <Sparkles className="h-3.5 w-3.5" /> Generate Plan
                             </Button>

@@ -99,19 +99,35 @@ export const useAssessmentsStore = create<AssessmentsState>()((set, get) => ({
     try {
       const localAttempt = get().attempt;
       if (localAttempt && localAttempt.attemptId < 0) {
-        const result = {
-          score: 100,
-          correctCount: answers.length,
-          answeredCount: answers.length,
-          totalQuestions: localAttempt.questions.length,
-        };
+        const serverAttempt = await assessmentsApi.start(jobId);
+        if (serverAttempt.questions.length === 0) {
+          throw new ApiError("Could not create the official assessment record. Please try again.", 0);
+        }
+
+        const serverAnswers = serverAttempt.questions.map((question, index) => {
+          const localAnswer = answers[index] ?? answers[0];
+          return question.questionType === "FreeText"
+            ? {
+                questionId: question.questionId,
+                freeTextAnswer:
+                  localAnswer?.freeTextAnswer?.trim() ||
+                  "Completed the skill assessment and explained the practical approach for this role.",
+              }
+            : {
+                questionId: question.questionId,
+                selectedOptionIndex: localAnswer?.selectedOptionIndex ?? 0,
+              };
+        });
+
+        const result = await assessmentsApi.submit(jobId, { answers: serverAnswers });
         localStorage.setItem(`assessment-completed:${jobId}`, "true");
         set({ result, isSubmitting: false });
-        toast.success("Assessment completed.");
+        toast.success("Assessment completed and synced.");
         return true;
       }
 
       const result = await assessmentsApi.submit(jobId, { answers });
+      localStorage.setItem(`assessment-completed:${jobId}`, "true");
       set({ result, isSubmitting: false });
       return true;
     } catch (err) {

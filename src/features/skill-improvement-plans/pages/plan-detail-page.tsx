@@ -21,6 +21,7 @@ import type { SkillResourceDto } from "@/features/skill-resources/types";
 import { skillImprovementPlansApi } from "../api";
 import { AddEvidenceDialog } from "../components/add-evidence-dialog";
 import { ProgressStepper } from "../components/progress-stepper";
+import { getLocalSkillPlan, updateLocalSkillPlan } from "../local-plans";
 import type { SkillImprovementPlanDto } from "../types";
 
 export function PlanDetailPage() {
@@ -34,6 +35,13 @@ export function PlanDetailPage() {
 
   useEffect(() => {
     if (!planId) return;
+    const localPlan = getLocalSkillPlan(candidateId, Number(planId));
+    if (localPlan) {
+      setPlan(localPlan);
+      skillResourcesApi.getAll().then((all) => setResources(all.filter((r) => r.isActive)));
+      return;
+    }
+
     skillImprovementPlansApi
       .getById(candidateId, Number(planId))
       .then(setPlan)
@@ -43,6 +51,22 @@ export function PlanDetailPage() {
 
   const handleToggleStep = async (stepId: number, isCompleted: boolean) => {
     if (!plan) return;
+    if (plan.planId < 0) {
+      const steps = plan.steps.map((step) =>
+        step.stepId === stepId ? { ...step, isCompleted, completedAt: isCompleted ? new Date().toISOString() : null } : step,
+      );
+      const completedCount = steps.filter((step) => step.isCompleted).length;
+      const progressPercent = Math.round((completedCount / Math.max(1, steps.length)) * 100);
+      const updated: SkillImprovementPlanDto = {
+        ...plan,
+        steps,
+        progressPercent,
+        status: progressPercent === 100 ? "Completed" : progressPercent > 0 ? "Learning" : "NotStarted",
+      };
+      setPlan(updateLocalSkillPlan(candidateId, updated));
+      return;
+    }
+
     try {
       const updated = await skillImprovementPlansApi.setStepCompletion(candidateId, plan.planId, stepId, isCompleted);
       setPlan(updated);
@@ -51,10 +75,22 @@ export function PlanDetailPage() {
     }
   };
 
-  const reloadPlan = () => skillImprovementPlansApi.getById(candidateId, Number(planId)).then(setPlan);
+  const reloadPlan = () => {
+    const localPlan = getLocalSkillPlan(candidateId, Number(planId));
+    if (localPlan) {
+      setPlan(localPlan);
+      return Promise.resolve(localPlan);
+    }
+    return skillImprovementPlansApi.getById(candidateId, Number(planId)).then(setPlan);
+  };
 
   const handleRemoveEvidence = async (evidenceId: number) => {
     if (!plan) return;
+    if (plan.planId < 0) {
+      toast.info("Evidence upload is available after an online plan is generated.");
+      return;
+    }
+
     try {
       await skillImprovementPlansApi.removeEvidence(candidateId, plan.planId, evidenceId);
       reloadPlan();
@@ -65,6 +101,11 @@ export function PlanDetailPage() {
 
   const handleSubmitEvidence = async (evidenceId: number) => {
     if (!plan) return;
+    if (plan.planId < 0) {
+      toast.info("Evidence review is available after an online plan is generated.");
+      return;
+    }
+
     try {
       await skillImprovementPlansApi.submitEvidence(candidateId, plan.planId, evidenceId);
       toast.success("Submitted for review.");
@@ -219,7 +260,7 @@ export function PlanDetailPage() {
               <CardTitle className="flex items-center gap-1.5 text-base">
                 <FileCheck2 className="h-4 w-4" /> Evidence
               </CardTitle>
-              <AddEvidenceDialog candidateId={candidateId} planId={plan.planId} onAdded={reloadPlan} />
+              {plan.planId > 0 && <AddEvidenceDialog candidateId={candidateId} planId={plan.planId} onAdded={reloadPlan} />}
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
               {plan.evidence.length === 0 ? (
