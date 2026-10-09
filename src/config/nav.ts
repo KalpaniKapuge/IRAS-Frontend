@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  BookOpen,
   Bot,
   Briefcase,
   Building2,
@@ -15,7 +14,6 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
-  Sparkles,
   Target,
   Users,
 } from "lucide-react";
@@ -82,9 +80,6 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
       items: [
         { label: "Users", to: "/admin/users", icon: Users },
         { label: "Job Postings", to: "/admin/jobs", icon: Briefcase },
-        { label: "Skill Taxonomy", to: "/admin/skills", icon: Sparkles },
-        { label: "Knowledge Base", to: "/admin/knowledge-base", icon: FileStack },
-        { label: "Skill Resources", to: "/admin/skill-resources", icon: BookOpen },
       ],
     },
     {

@@ -28,7 +28,15 @@ function isUsableResume(resume: ResumeDto) {
   return resume.parseStatus === "Parsed" || resume.parseStatus === "ManuallyEdited";
 }
 
-export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: string }) {
+export function ApplyDialog({
+  jobId,
+  jobTitle,
+  triggerLabel = "Apply now",
+}: {
+  jobId: number;
+  jobTitle: string;
+  triggerLabel?: string;
+}) {
   const apply = useApplicationsStore((s) => s.apply);
   const isApplying = useApplicationsStore((s) => s.isApplying);
   const myApplications = useApplicationsStore((s) => s.myApplications);
@@ -142,7 +150,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: number; jobTitle: stri
           className="h-auto min-h-12 w-full max-w-sm whitespace-normal px-5 py-3 text-base font-bold leading-tight shadow-elevated sm:w-auto"
           disabled={isCheckingApplication || !!existingApplication}
         >
-          <Send className="h-4 w-4" /> {isCheckingApplication ? "Checking..." : existingApplication ? "Already applied" : "Apply now"}
+          <Send className="h-4 w-4" /> {isCheckingApplication ? "Checking..." : existingApplication ? "Already applied" : triggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-xl">

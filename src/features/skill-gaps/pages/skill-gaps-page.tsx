@@ -12,7 +12,6 @@ import { Progress } from "@/components/ui/progress";
 import { RowSkeletonList } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/format";
-import { titleCase } from "@/lib/utils";
 import { ApiError } from "@/types/common";
 import { useAuthStore } from "@/features/auth/store";
 import { skillResourcesApi } from "@/features/skill-resources/api";

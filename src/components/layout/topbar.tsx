@@ -1,10 +1,13 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { useAuthStore } from "@/features/auth/store";
+import { candidateProfileApi } from "@/features/candidate-profile/api";
+import { employerProfileApi } from "@/features/employer-profile/api";
 import { ROLE_HOME } from "@/config/nav";
 import { useUiStore } from "@/stores/ui-store";
 import { getInitials } from "@/lib/utils";
@@ -19,6 +22,28 @@ export function Topbar() {
   const user = useAuthStore((s) => s.user);
   const setMobileNavOpen = useUiStore((s) => s.setMobileNavOpen);
   const navigate = useNavigate();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    setAvatarUrl(null);
+
+    const loadAvatar = async () => {
+      try {
+        if (user.role === "Candidate") {
+          const profile = await candidateProfileApi.getProfile(user.userId);
+          setAvatarUrl(profile.profilePictureUrl ?? null);
+        } else if (user.role === "Employer") {
+          const profile = await employerProfileApi.get(user.userId);
+          setAvatarUrl(profile.logoUrl ?? null);
+        }
+      } catch {
+        setAvatarUrl(null);
+      }
+    };
+
+    loadAvatar();
+  }, [user]);
 
   if (!user) return null;
   const [firstName, lastName] = user.email.split("@")[0].split(".");
@@ -46,6 +71,7 @@ export function Topbar() {
           aria-label="Go to profile"
         >
           <Avatar className="h-8 w-8">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
             <AvatarFallback>{getInitials(firstName, lastName)}</AvatarFallback>
           </Avatar>
         </button>

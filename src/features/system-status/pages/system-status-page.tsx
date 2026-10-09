@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Activity, Cpu, FileWarning, Gauge, HardDrive, Timer } from "lucide-react";
+import { Activity, Cpu, FileWarning, Gauge, HardDrive, SlidersHorizontal } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScoreBar } from "@/components/shared/score-bar";
 import { PageSpinner } from "@/components/shared/loading-state";
 import { formatBytes, formatPercent } from "@/lib/utils";
@@ -12,6 +13,7 @@ import type { AiModelStatusDto, SystemSettingsDto } from "../types";
 export function SystemStatusPage() {
   const [aiStatus, setAiStatus] = useState<AiModelStatusDto | null>(null);
   const [settings, setSettings] = useState<SystemSettingsDto | null>(null);
+  const [showProcessingDetails, setShowProcessingDetails] = useState(false);
 
   useEffect(() => {
     systemStatusApi.getAiStatus().then(setAiStatus);
@@ -22,14 +24,14 @@ export function SystemStatusPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="System Status" description="AI service health and current platform configuration." />
+      <PageHeader title="System Status" description="Operational health, scoring configuration, and platform limits." />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-base flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" /> AI Service</CardTitle>
-              <CardDescription className="mt-1 truncate">{aiStatus.aiServiceBaseUrl}</CardDescription>
+              <CardTitle className="text-base flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" /> Processing Service</CardTitle>
+              <CardDescription className="mt-1">Resume parsing and ranking support</CardDescription>
             </div>
             <Badge variant={aiStatus.aiServiceOnline ? "success" : "destructive"} className="gap-1.5">
               <span className={`h-1.5 w-1.5 rounded-full ${aiStatus.aiServiceOnline ? "bg-success" : "bg-destructive"}`} />
@@ -66,11 +68,20 @@ export function SystemStatusPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><Timer className="h-4 w-4 text-primary" /> AI service limits</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-primary" /> Processing configuration</CardTitle>
+            <CardDescription>Advanced service details are available when needed.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Request timeout</span><span className="font-medium">{settings.aiServiceTimeoutSeconds}s</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Base URL</span><span className="truncate font-medium">{settings.aiServiceBaseUrl}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Service status</span><span className="font-medium">{aiStatus.aiServiceOnline ? "Available" : "Needs attention"}</span></div>
+            <Button variant="outline" size="sm" onClick={() => setShowProcessingDetails((value) => !value)}>
+              {showProcessingDetails ? "Hide details" : "Show details"}
+            </Button>
+            {showProcessingDetails && (
+              <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
+                <div className="flex justify-between gap-3"><span className="text-muted-foreground">Request timeout</span><span className="font-medium">{settings.aiServiceTimeoutSeconds}s</span></div>
+                <div className="flex justify-between gap-3"><span className="text-muted-foreground">Endpoint</span><span className="truncate font-medium">{settings.aiServiceBaseUrl}</span></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

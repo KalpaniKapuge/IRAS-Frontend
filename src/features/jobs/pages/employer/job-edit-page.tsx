@@ -200,7 +200,11 @@ export function JobEditPage() {
                 <p className={`text-right text-xs ${notes.length > 1900 ? "text-warning" : "text-muted-foreground"}`}>
                   {notes.length}/2000
                 </p>
-                <Button onClick={handleGenerate} loading={isGeneratingJd} variant="secondary">
+                <Button
+                  onClick={handleGenerate}
+                  loading={isGeneratingJd}
+                  className="border border-primary/20 bg-primary px-5 font-semibold text-primary-foreground shadow-elevated hover:bg-primary/90"
+                >
                   <Sparkles className="h-4 w-4" /> {job.generatedJd ? "Regenerate description" : "Generate description"}
                 </Button>
               </CardContent>

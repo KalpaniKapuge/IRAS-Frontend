@@ -141,7 +141,7 @@ export function ScheduleInterviewDialog({
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {INTERVIEW_MODES.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>{m === "Onsite" ? "On Site" : m}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

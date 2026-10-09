@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarClock, MapPin, Users, Video } from "lucide-react";
+import { CalendarClock, MapPin, Video } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +10,7 @@ import { useInterviewsStore } from "../store";
 import { ScheduleInterviewDialog } from "./schedule-interview-dialog";
 import type { InterviewDto } from "../types";
 
-const modeIcon = { Onsite: MapPin, Remote: Video, Phone: Users } as const;
+const modeIcon = { Onsite: MapPin, Remote: Video } as const;
 
 export function InterviewListItem({
   interview,
@@ -25,7 +25,7 @@ export function InterviewListItem({
   const updateOutcome = useInterviewsStore((s) => s.updateOutcome);
   const [outcome, setOutcome] = useState("");
 
-  const ModeIcon = modeIcon[interview.mode];
+  const ModeIcon = modeIcon[interview.mode] ?? CalendarClock;
   const isScheduled = interview.status === "Scheduled";
   const isPast = new Date(interview.scheduledAt) < new Date();
 

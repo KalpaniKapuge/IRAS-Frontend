@@ -126,7 +126,7 @@ export const LINK_EVIDENCE_TYPES = ["GitHub", "Other"] as const satisfies readon
 export const EVIDENCE_VERIFICATION_STATUSES = ["Draft", "Pending", "Approved", "Rejected", "RevisionRequired"] as const;
 export type EvidenceVerificationStatus = (typeof EVIDENCE_VERIFICATION_STATUSES)[number];
 
-export const INTERVIEW_MODES = ["Onsite", "Remote", "Phone"] as const;
+export const INTERVIEW_MODES = ["Onsite", "Remote"] as const;
 export type InterviewMode = (typeof INTERVIEW_MODES)[number];
 
 export const INTERVIEW_STATUSES = ["Scheduled", "Completed", "NoShow", "Cancelled"] as const;

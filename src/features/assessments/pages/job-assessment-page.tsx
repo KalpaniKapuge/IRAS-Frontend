@@ -7,6 +7,7 @@ import { PageSpinner } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { cn } from "@/lib/utils";
 import { useJobsStore } from "@/features/jobs/store";
+import { ApplyDialog } from "@/features/applications/components/apply-dialog";
 import { useAssessmentsStore } from "../store";
 import { AssessmentQuestionCard } from "../components/assessment-question-card";
 import type { AssessmentQuestionDto, StartAssessmentResponse, SubmitAssessmentAnswer } from "../types";
@@ -212,7 +213,7 @@ export function JobAssessmentPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <Button onClick={() => navigate(`/candidate/jobs/${numericJobId}`)}>Continue to apply</Button>
+            <ApplyDialog jobId={numericJobId} jobTitle={currentJob.title} triggerLabel="Continue to apply" />
           </CardContent>
         </Card>
       </div>
